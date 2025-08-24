@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
-import {ANDROID_CHANNEL_ID} from "@/hooks/useNotification";
+
+export const ANDROID_CHANNEL_ID = "default";
 
 export const scheduleLocalNotification = async (
     title: string,
