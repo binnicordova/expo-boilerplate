@@ -1,4 +1,4 @@
-import {MasonryFlashList} from "@shopify/flash-list";
+import {FlashList} from "@shopify/flash-list";
 import {router} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
 import {useEffect} from "react";
@@ -23,7 +23,6 @@ import {styles} from "@/styles";
 import {theme} from "@/theme/colors";
 import {FONT_SIZE} from "@/theme/fonts";
 
-const ESTIMATED_ITEM_SIZE = 50;
 const COLUMNS = 2;
 
 type ItemProps = {
@@ -49,7 +48,7 @@ const HomeScreen = () => {
     const skip = () =>
         router.push(
             PATHS.WEB(
-                "https://www.linkedin.com/in/binni-cordova-a77000175",
+                "https://www.linkedin.com/in/binnicordova",
                 "Binni Cordova"
             )
         );
@@ -118,7 +117,8 @@ const HomeScreen = () => {
     );
 
     return (
-        <MasonryFlashList
+        <FlashList
+            masonry
             refreshing={loading}
             refreshControl={
                 <RefreshControl
@@ -135,7 +135,6 @@ const HomeScreen = () => {
             extraData={favoritesLastUpdated}
             keyExtractor={(item: Category) => item.name}
             numColumns={COLUMNS}
-            estimatedItemSize={ESTIMATED_ITEM_SIZE}
             ListHeaderComponent={header}
             ListEmptyComponent={emptyList}
             ListFooterComponent={footer}

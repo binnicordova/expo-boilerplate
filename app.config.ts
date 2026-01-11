@@ -5,24 +5,24 @@ const EAS_OWNER = process.env.EAS_OWNER; // by https://www.binnicordova.com
 const EAS_SLUG = "expo-boilerplate";
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 
-const VERSION = "0.0.3";
-const VERSION_CODE = 3;
+const VERSION = "0.0.4";
+const VERSION_CODE = 4;
 
 const APP_VARIANTS = {
     development: {
-        identifier: "com.boilerplate.dev",
-        name: "Expo Boilerplate (Dev)",
-        scheme: "dev.boilerplate.com",
+        identifier: "com.expo.dev",
+        name: "Expo (Dev)",
+        scheme: "dev.expo.com",
     },
     preview: {
-        identifier: "com.boilerplate.preview",
-        name: "Expo Boilerplate (Preview)",
-        scheme: "preview.boilerplate.com",
+        identifier: "com.expo.preview",
+        name: "Expo (Preview)",
+        scheme: "preview.expo.com",
     },
     production: {
-        identifier: "com.boilerplate",
-        name: "Expo Boilerplate",
-        scheme: "boilerplate.com",
+        identifier: "com.expo",
+        name: "Expo",
+        scheme: "expo.com",
     },
 };
 
@@ -52,15 +52,18 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         backgroundColor: "#ffffff",
     },
     updates: {
-        fallbackToCacheTimeout: 0,
         url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
+        fallbackToCacheTimeout: 0,
         enabled: true,
+        checkAutomatically: "ON_LOAD",
     },
     assetBundlePatterns: ["**/*"],
     ios: {
         supportsTablet: true,
         bundleIdentifier: getUniqueIdentifier(),
-        version: VERSION,
+        infoPlist: {
+            UIBackgroundModes: ["process"],
+        },
     },
     android: {
         adaptiveIcon: {
@@ -68,8 +71,6 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
             backgroundColor: "#FFFFFF",
         },
         package: getUniqueIdentifier(),
-        versionCode: VERSION_CODE,
-        version: VERSION,
     },
     web: {
         favicon: "./assets/favicon.png",
@@ -84,9 +85,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         },
     },
     owner: EAS_OWNER,
-    runtimeVersion: {
-        policy: "appVersion",
-    },
+    runtimeVersion: `${VERSION}+${VERSION_CODE}`,
     userInterfaceStyle: "automatic",
     plugins: [
         [
@@ -105,5 +104,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
                 enableBackgroundRemoteNotifications: true,
             },
         ],
+        "expo-updates",
+        "expo-background-task",
     ],
 });

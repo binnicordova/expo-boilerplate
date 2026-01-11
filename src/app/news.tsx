@@ -59,7 +59,6 @@ export default function NewsScreen() {
             }
             data={articles}
             renderItem={renderItem}
-            estimatedItemSize={50}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.objectID}
             contentContainerStyle={styles.safeArea}

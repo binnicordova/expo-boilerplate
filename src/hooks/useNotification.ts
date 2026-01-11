@@ -1,15 +1,17 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import {router} from "expo-router";
-import {Alert, Linking} from "react-native";
+import {Alert, Linking, Platform} from "react-native";
 import {PATHS} from "@/constants/routes";
 import {STORAGE_ID} from "@/constants/storage";
 import {STRINGS} from "@/constants/strings";
 import {theme} from "@/theme/colors";
-import {scheduleLocalNotification} from "@/utils/notification";
+import {
+    ANDROID_CHANNEL_ID,
+    scheduleLocalNotification,
+} from "@/utils/notification";
 import {storage} from "@/utils/storage";
 
-export const ANDROID_CHANNEL_ID = "default";
 const ANDROID_CONFIG = {
     name: "default",
     importance: Notifications.AndroidImportance.MAX,
@@ -27,10 +29,12 @@ const handleNotificationConfig = {
 
 export const initNotification = () => {
     const registerForPushNotificationsAsync = async () => {
-        Notifications.setNotificationChannelAsync(
-            ANDROID_CHANNEL_ID,
-            ANDROID_CONFIG
-        );
+        if (Platform.OS === "android") {
+            await Notifications.setNotificationChannelAsync(
+                ANDROID_CHANNEL_ID,
+                ANDROID_CONFIG
+            );
+        }
 
         const {status: existingStatus} =
             await Notifications.getPermissionsAsync();
