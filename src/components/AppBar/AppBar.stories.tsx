@@ -1,5 +1,4 @@
 import type {Meta, StoryObj} from "@storybook/react";
-import {View} from "react-native";
 import {AppBar} from "./AppBar";
 
 const meta = {
@@ -8,13 +7,6 @@ const meta = {
     args: {
         title: "AppBar",
     },
-    decorators: [
-        (Story) => (
-            <View style={{padding: 16}}>
-                <Story />
-            </View>
-        ),
-    ],
 } satisfies Meta<typeof AppBar>;
 
 export default meta;

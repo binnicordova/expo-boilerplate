@@ -1,17 +1,14 @@
 import {StyleSheet} from "react-native";
+import {SHADOW} from "@/theme/shadow";
+import {SPACING} from "@/theme/spacing";
 
 export const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
         borderRadius: 12,
-        marginVertical: 6,
-        marginHorizontal: 16,
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 2,
+        marginVertical: SPACING[2],
+        marginHorizontal: SPACING[4],
+        padding: SPACING[4],
+        ...SHADOW.small,
     },
     row: {
         flexDirection: "row",

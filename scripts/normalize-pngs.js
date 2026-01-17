@@ -5,8 +5,9 @@
   It reads each PNG and re-saves it, which helps fix issues with color profiles,
   bit depth, or other metadata that can cause build failures.
 */
-const fs = require("fs").promises;
-const path = require("path");
+
+const fs = require("node:fs").promises;
+const path = require("node:path");
 const sharp = require("sharp");
 
 const assetsDir = path.resolve(__dirname, "../assets");

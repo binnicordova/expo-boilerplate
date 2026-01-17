@@ -44,6 +44,7 @@ const RootLayout = () => {
 let AppEntryPoint = RootLayout;
 
 if (process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === "true") {
+    console.log("🎨 Storybook mode enabled");
     try {
         AppEntryPoint = require("../../.rnstorybook").default;
         SplashScreen.hideAsync();

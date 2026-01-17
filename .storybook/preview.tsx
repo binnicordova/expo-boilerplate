@@ -1,8 +1,9 @@
+import {NavigationContainer} from "@react-navigation/native";
 import type {Preview} from "@storybook/react";
+import {View} from "react-native";
 
 const preview: Preview = {
     parameters: {
-        // actions: { argTypesRegex: "^on[A-Z].*" },
         controls: {
             matchers: {
                 color: /(background|color)$/i,
@@ -12,6 +13,16 @@ const preview: Preview = {
     },
 
     tags: ["autodocs"],
+
+    decorators: [
+        (Story) => (
+            <NavigationContainer>
+                <View style={{padding: 16, flex: 1}}>
+                    <Story />
+                </View>
+            </NavigationContainer>
+        ),
+    ],
 };
 
 export default preview;
