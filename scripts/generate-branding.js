@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
-  Generate TapPro branding assets using Sharp from SVG templates.
+  Generate branding assets using Sharp from SVG templates.
   Outputs:
     - assets/icon.png (1024x1024)
     - assets/adaptive-icon.png (1024x1024, transparent bg)
@@ -10,10 +10,11 @@
     - resources/feature-graphic.png (1024x500)
     - resources/privacy-policy.html to PlayStore/AppStore
 */
-const fs = require("fs");
-const path = require("path");
+
+const fs = require("node:fs");
+const path = require("node:path");
 const sharp = require("sharp");
-const readline = require("readline");
+const readline = require("node:readline");
 
 const out = (p) => path.resolve(process.cwd(), p);
 
@@ -50,7 +51,7 @@ function logoSVG({
     color: _color = "#ffe3c9",
     bg: _bg = "transparent",
     withGradientBg: _withGradientBg = false,
-    brand,
+    brand: _brand,
     inputIsSVG,
     logo,
 } = {}) {
@@ -81,7 +82,7 @@ function splashSVG({
     const r3 = Math.round(minSide * 0.3);
 
     const logoSize = Math.round(r3 / 0.8);
-    const gradientId = "bgGrad";
+    const _gradientId = "bgGrad";
     const shadowId = "textShadow";
 
     if (!inputIsSVG) {

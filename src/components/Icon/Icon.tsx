@@ -15,6 +15,7 @@ const MaterialCommunityIcons = createIconSet(
 );
 
 export type IconProps = ComponentProps<typeof MaterialCommunityIcons>;
+export type IconName = IconProps["name"];
 
 export const Icon = ({name, style, size, onPress, ...props}: IconProps) => {
     const color = theme().text;

@@ -1,19 +1,28 @@
 ![Expo React Native Boilerplate](./resources/expo-rn-boilerplate_bcordova.gif)
 
-# Expo Boilerplate v0.0.4 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
+# Expo Boilerplate v0.0.5 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
 
-A short, easy-to-understand starter for building mobile apps with Expo + React Native. It includes common tools so teams can move faster without dealing with setup details.
+Crafted by an Expo developer with over 8 years of experience, this is a short, easy-to-understand starter for building mobile apps with Expo + React Native. Version **v0.0.5** now includes built-in **AI Agent Skills** designed to accelerate development, control AI generation for higher quality output, and enforce clean code standards automatically. 
 
 **Who is this for?**
 - Product people and designers who want a quick overview.
-- Developers who need a ready-to-use project.
+- Developers who need a ready-to-use project with AI-superpowers.
 
 ## Quick start
 
-1. Use the template to create a new Expo project:
+1. Clone the repository:
 
 ```sh
-pnpx create-expo --template https://github.com/BinniZenobioCordovaLeandro/expo-boilerplate_binnicordova
+git clone https://github.com/binnicordova/expo-boilerplate.git
+cd expo-boilerplate_binnicordova
+```
+
+or, Use the --template to create a new Expo project:
+
+> **Note**: This will remove the AI Skills, prompts, and instruction files. I recommend using the `git clone` option instead if you want a fully configured project.
+
+```sh
+pnpx create-expo --template https://github.com/binnicordova/expo-boilerplate
 ```
 
 2. Install dependencies:
@@ -32,6 +41,7 @@ pnpm start
 
 - **Preview on a device**: `pnpm run eas-preview`
 - **Run component stories**: `pnpm run storybook:start`
+- **Browse stories on the web**: `pnpm run storybook:web` 🌐
 - **Run tests**: `pnpm run test`
 
 ## Where to look in the code (Project Structure)
@@ -85,10 +95,27 @@ Generate the Assets to the app and Stores with simple script:
 pnpm run generate:branding
 ```
 
-## 🤖 AI automation prompts
+## 🤖 AI Agent Skills & Automation
 
-Use the AI powerups tipying "#" and the prompt into your AI chatbox editor:
+This boilerplate is uniquely optimized for AI-assisted development. It includes **Specialized Agent Skills** (located in `.github/skills/`) that teach your AI assistant (Copilot, Cursor, etc.) how to:
 
+- 🚀 **Accelerate Coding**: Get from idea to implementation faster with domain-specific knowledge.
+- 🎯 **Control Generation**: Ensure the AI follows the exact technical standards of this project (Jotai, Expo Router, Biome).
+- 🧹 **Perform Clean Code**: Automatic enforcement of modular architecture and technical debt prevention.
+- ⏱️ **Save Time**: Reduce manual research by providing the AI with immediate project context.
+
+### How to use
+Use the AI powerups by typing "#" and selecting the prompt or skill in your AI chatbox editor:
+
+```
+#expo-architect       - Modular architecture and technical standards
+#building-ui          - Guide for Native UI, animations, and icons
+#api-routes           - Serverless API development workflows
+#deployment           - App Store and Play Store submission guide
+#upgrading-expo       - SDK update patterns and dependency fixes
+```
+
+**Automation Prompts:**
 ```
 #EXPO-RELEASE-NEXT-VERSION.prompt.md
 #EXPO-TEST-CREATE.prompt.md

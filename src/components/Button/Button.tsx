@@ -1,14 +1,18 @@
-import {
-    type ButtonProps as RNButtonProps,
-    Text,
-    TouchableOpacity,
-} from "react-native";
+import {Text, TouchableOpacity, type TouchableOpacityProps} from "react-native";
 import {theme} from "@/theme/colors";
 import {styles} from "./Button.styles";
 
-export type ButtonProps = RNButtonProps;
+export type ButtonProps = TouchableOpacityProps & {
+    title: string;
+};
 
-export const Button = ({title, onPress, disabled, ...props}: ButtonProps) => {
+export const Button = ({
+    title,
+    onPress,
+    disabled,
+    style,
+    ...props
+}: ButtonProps) => {
     const {background: color, accent: backgroundColor} = theme();
     return (
         <TouchableOpacity
@@ -17,6 +21,7 @@ export const Button = ({title, onPress, disabled, ...props}: ButtonProps) => {
                 styles.container,
                 {backgroundColor},
                 disabled && styles.disabled,
+                style,
             ]}
             onPress={disabled ? undefined : onPress}
             disabled={disabled}
