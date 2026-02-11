@@ -4,12 +4,12 @@ Please follow these steps to release the next version of the app:
 
 1.  **Update Versions**:
     -   Read `package.json` to find the current version.
-    -   Increment the patch version (e.g., if `0.0.4`, make it `0.0.5`).
+    -   Increment the patch version (e.g., if `0.0.4`, make it `0.0.6`).
     -   Update `package.json` with the new version.
     -   Read `app.config.ts`.
     -   Update the `VERSION` constant to the new version.
     -   Increment the `VERSION_CODE` constant by 1.
-    -   Read `README.md` and update the H1 title to include the new version (e.g. `# Expo Boilerplate v0.0.5 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)`).
+    -   Read `README.md` and update the H1 title to include the new version (e.g. `# Expo Boilerplate v0.0.6 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)`).
     -   Save all files.
 
 2.  **Build**:

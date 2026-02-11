@@ -1,8 +1,8 @@
 ![Expo React Native Boilerplate](./resources/expo-rn-boilerplate_bcordova.gif)
 
-# Expo Boilerplate v0.0.5 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
+# Expo Boilerplate v0.0.6 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
 
-Crafted by an Expo developer with over 8 years of experience, this is a short, easy-to-understand starter for building mobile apps with Expo + React Native. Version **v0.0.5** now includes built-in **AI Agent Skills** designed to accelerate development, control AI generation for higher quality output, and enforce clean code standards automatically. 
+Crafted by an Expo developer with over 8 years of experience, this is a short, easy-to-understand starter for building mobile apps with Expo + React Native. Version **v0.0.6** now includes built-in **AI Agent Skills** designed to accelerate development, control AI generation for higher quality output, and enforce clean code standards automatically. 
 
 **Who is this for?**
 - Product people and designers who want a quick overview.

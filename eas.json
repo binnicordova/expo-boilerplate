@@ -21,6 +21,15 @@
         },
         "production": {
             "channel": "production"
+        },
+        "production:local": {
+            "channel": "production",
+            "ios": {
+                "simulator": true
+            },
+            "android": {
+                "buildType": "apk"
+            }
         }
     },
     "submit": {

@@ -5,8 +5,8 @@ const EAS_OWNER = process.env.EAS_OWNER; // by https://www.binnicordova.com
 const EAS_SLUG = "expo-boilerplate";
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 
-const VERSION = "0.0.5";
-const VERSION_CODE = 5;
+const VERSION = "0.0.6";
+const VERSION_CODE = 6;
 
 const APP_VARIANTS = {
     development: {
@@ -63,6 +63,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         bundleIdentifier: getUniqueIdentifier(),
         infoPlist: {
             UIBackgroundModes: ["process"],
+            ITSAppUsesNonExemptEncryption: false,
         },
     },
     android: {
