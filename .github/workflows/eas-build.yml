@@ -18,16 +18,13 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v4
 
-      - name: 🏗 Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
+      - name: 🏗 Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: pnpm
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
@@ -36,7 +33,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: 🚀 Build app
         run: eas build --platform android --non-interactive
