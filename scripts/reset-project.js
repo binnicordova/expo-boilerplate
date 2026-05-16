@@ -7,6 +7,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const readline = require("node:readline");
+const {execSync} = require("node:child_process");
 
 const root = process.cwd();
 // Files and directories to move/delete
@@ -143,88 +144,143 @@ const rl = readline.createInterface({
     output: process.stdout,
 });
 
-async function moveOrDelete(userInput) {
-    try {
-        if (userInput === "y") {
-            await fs.promises.mkdir(examplePath, {recursive: true});
-            console.log(`📁  Created backup folder: /${exampleDir}`);
-        }
-
-        for (const relPath of oldPaths) {
-            const absPath = path.join(root, relPath);
-            if (fs.existsSync(absPath)) {
-                if (userInput === "y") {
-                    const target = path.join(examplePath, relPath);
-                    await fs.promises.mkdir(path.dirname(target), {
-                        recursive: true,
-                    });
-                    await fs.promises.rename(absPath, target);
-                    console.log(
-                        `➡️  Moved: ${relPath} → ${path.relative(root, target)}`
-                    );
-                } else {
-                    await fs.promises.rm(absPath, {
-                        recursive: true,
-                        force: true,
-                    });
-                    console.log(`🗑️  Deleted: ${relPath}`);
-                }
-            } else {
-                console.log(`⚠️  Not found (skipped): ${relPath}`);
+const askYesNo = (question, defaultYes = true) =>
+    new Promise((resolve) => {
+        rl.question(question, (answer) => {
+            const trimmed = answer.trim().toLowerCase();
+            if (!trimmed) {
+                resolve(defaultYes);
+                return;
             }
+            if (trimmed === "y" || trimmed === "yes") {
+                resolve(true);
+                return;
+            }
+            if (trimmed === "n" || trimmed === "no") {
+                resolve(false);
+                return;
+            }
+            console.log("Oops! Please enter Y or n so I know what to do. 😊");
+            resolve(askYesNo(question, defaultYes));
+        });
+    });
+
+async function moveOrDelete(shouldBackup) {
+    if (shouldBackup) {
+        await fs.promises.mkdir(examplePath, {recursive: true});
+        console.log(`📁  Created backup folder: /${exampleDir}`);
+    }
+
+    for (const relPath of oldPaths) {
+        const absPath = path.join(root, relPath);
+        if (fs.existsSync(absPath)) {
+            if (shouldBackup) {
+                const target = path.join(examplePath, relPath);
+                await fs.promises.mkdir(path.dirname(target), {
+                    recursive: true,
+                });
+                await fs.promises.rename(absPath, target);
+                console.log(
+                    `➡️  Moved: ${relPath} → ${path.relative(root, target)}`
+                );
+            } else {
+                await fs.promises.rm(absPath, {
+                    recursive: true,
+                    force: true,
+                });
+                console.log(`🗑️  Deleted: ${relPath}`);
+            }
+        } else {
+            console.log(`⚠️  Not found (skipped): ${relPath}`);
         }
+    }
 
-        // Scaffold new app folder
-        await fs.promises.mkdir(newAppPath, {recursive: true});
-        console.log(`📁  Created: ${newAppDir}`);
+    // Scaffold new app folder
+    await fs.promises.mkdir(newAppPath, {recursive: true});
+    console.log(`📁  Created: ${newAppDir}`);
 
-        // Write index file
-        await fs.promises.writeFile(
-            path.join(newAppPath, "index.tsx"),
-            indexContent
+    // Write index file
+    await fs.promises.writeFile(
+        path.join(newAppPath, "index.tsx"),
+        indexContent
+    );
+    console.log("📝  Created: src/app/index.tsx");
+
+    // Update tasks index to simple local notification task
+    await fs.promises.writeFile(
+        path.join(root, "src", "tasks", "index.ts"),
+        tasksContent
+    );
+    console.log("📝  Updated: src/tasks/index.ts");
+
+    // Update background fetch hook to use localNotificationTask
+    await fs.promises.writeFile(
+        path.join(root, "src", "hooks", "useBackgroundFetch.ts"),
+        backgroundFetchContent
+    );
+    console.log("📝  Updated: src/hooks/useBackgroundFetch.ts");
+
+    // Update routes definitions
+    await fs.promises.writeFile(
+        path.join(root, "src", "constants", "routes.ts"),
+        routesContent
+    );
+    console.log("📝  Updated: src/constants/routes.ts");
+
+    // Update strings definitions
+    await fs.promises.writeFile(
+        path.join(root, "src", "constants", "strings.ts"),
+        stringsContent
+    );
+    console.log("📝  Updated: src/constants/strings.ts");
+
+    // Create .env.example file
+    await fs.promises.writeFile(
+        path.join(root, ".env.example"),
+        envExampleContent
+    );
+    console.log("📝  Created: .env.example");
+}
+
+async function resetGitRepo() {
+    const gitDir = path.join(root, ".git");
+    if (fs.existsSync(gitDir)) {
+        await fs.promises.rm(gitDir, {recursive: true, force: true});
+        console.log("🧹  Removed existing .git directory.");
+    }
+    const execOptions = {stdio: "inherit"};
+    execSync("git init", execOptions);
+    execSync("git add -A", execOptions);
+    execSync('git commit -m "Initialize clean project"', execOptions);
+}
+
+async function main() {
+    try {
+        const backupChoice = await askYesNo(
+            "Would you like to move existing folders to /project-example for safekeeping? (Y/n): ",
+            true
         );
-        console.log("📝  Created: src/app/index.tsx");
+        console.log("Awesome! Let's get your project reset. 🚀");
+        await moveOrDelete(backupChoice);
 
-        // Update tasks index to simple local notification task
-        await fs.promises.writeFile(
-            path.join(root, "src", "tasks", "index.ts"),
-            tasksContent
+        const gitChoice = await askYesNo(
+            "Would you like to reset the git history and create a fresh initial commit? (y/N): ",
+            false
         );
-        console.log("📝  Updated: src/tasks/index.ts");
-
-        // Update background fetch hook to use localNotificationTask
-        await fs.promises.writeFile(
-            path.join(root, "src", "hooks", "useBackgroundFetch.ts"),
-            backgroundFetchContent
-        );
-        console.log("📝  Updated: src/hooks/useBackgroundFetch.ts");
-
-        // Update routes definitions
-        await fs.promises.writeFile(
-            path.join(root, "src", "constants", "routes.ts"),
-            routesContent
-        );
-        console.log("📝  Updated: src/constants/routes.ts");
-
-        // Update strings definitions
-        await fs.promises.writeFile(
-            path.join(root, "src", "constants", "strings.ts"),
-            stringsContent
-        );
-        console.log("📝  Updated: src/constants/strings.ts");
-
-        // Create .env.example file
-        await fs.promises.writeFile(
-            path.join(root, ".env.example"),
-            envExampleContent
-        );
-        console.log("📝  Created: .env.example");
+        if (gitChoice) {
+            await resetGitRepo();
+        }
 
         console.log("\n✅  Project reset complete!");
-        if (userInput === "y")
+        if (backupChoice)
             console.log(
                 `🗂️  Your old files are safely in /${exampleDir}. Delete it when you're done referencing.`
             );
+        if (gitChoice) {
+            console.log("🔐  Git history reset with an initial commit.");
+        } else {
+            console.log("🧱  Git history was left intact.");
+        }
         console.log(`
 🚀  Run
 
@@ -242,16 +298,4 @@ Enjoy building with my Expo Boilerplate! 🎉
     }
 }
 
-rl.question(
-    "Would you like to move existing folders to /project-example for safekeeping? (Y/n): ",
-    (ans) => {
-        const input = ans.trim().toLowerCase() || "y";
-        if (input === "y" || input === "n") {
-            console.log("Awesome! Let's get your project reset. 🚀");
-            moveOrDelete(input);
-        } else {
-            console.log("Oops! Please enter Y or n so I know what to do. 😊");
-            rl.close();
-        }
-    }
-);
+main();
