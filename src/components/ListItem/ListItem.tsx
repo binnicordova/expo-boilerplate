@@ -1,8 +1,9 @@
 import type {ReactNode} from "react";
-import {TouchableOpacity, View, type ViewProps} from "react-native";
+import {View, type ViewProps} from "react-native";
 import {theme} from "@/theme/colors";
 import {Icon} from "../Icon/Icon";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./ListItem.styles";
 
 export type ListItemProps = {
@@ -27,8 +28,7 @@ export const ListItem = ({
     const {background} = theme();
 
     return (
-        <TouchableOpacity
-            activeOpacity={onPress ? 0.7 : 1}
+        <TouchableWrapper
             onPress={onPress}
             disabled={disabled || !onPress}
             style={[styles.container, {backgroundColor: background}, style]}
@@ -52,6 +52,6 @@ export const ListItem = ({
                     <Icon name="chevron-right" size={20} />
                 </View>
             )}
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };

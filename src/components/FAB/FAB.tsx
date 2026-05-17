@@ -1,15 +1,17 @@
-import {TouchableOpacity, type TouchableOpacityProps} from "react-native";
+import type {PressableProps, StyleProp, ViewStyle} from "react-native";
 import {theme} from "@/theme/colors";
 import {SHADOW} from "@/theme/shadow";
 import {Icon, type IconName} from "../Icon/Icon";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./FAB.styles";
 
-export type FABProps = TouchableOpacityProps & {
+export type FABProps = Omit<PressableProps, "style"> & {
     icon: IconName;
     onPress: () => void;
     color?: string;
     backgroundColor?: string;
     size?: number;
+    style?: StyleProp<ViewStyle>;
 };
 
 export const FAB = ({
@@ -24,8 +26,7 @@ export const FAB = ({
     const {accent, background} = theme();
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.8}
+        <TouchableWrapper
             onPress={onPress}
             style={[
                 styles.container,
@@ -41,6 +42,6 @@ export const FAB = ({
             {...props}
         >
             <Icon name={icon} size={size * 0.4} color={color ?? background} />
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };

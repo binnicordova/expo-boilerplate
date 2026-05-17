@@ -1,15 +1,10 @@
 import type {ReactNode} from "react";
 import {useState} from "react";
-import {
-    LayoutAnimation,
-    Platform,
-    TouchableOpacity,
-    UIManager,
-    View,
-} from "react-native";
+import {LayoutAnimation, Platform, UIManager, View} from "react-native";
 import {theme} from "@/theme/colors";
 import {Icon} from "../Icon/Icon";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Accordion.styles";
 
 if (
@@ -45,18 +40,14 @@ export const Accordion = ({
                 {backgroundColor: background, borderColor: lightness},
             ]}
         >
-            <TouchableOpacity
-                style={styles.header}
-                onPress={toggleExpand}
-                activeOpacity={0.7}
-            >
+            <TouchableWrapper style={styles.header} onPress={toggleExpand}>
                 <Text type="subtitle">{title}</Text>
                 <Icon
                     name={expanded ? "chevron-up" : "chevron-down"}
                     size={20}
                     color={text}
                 />
-            </TouchableOpacity>
+            </TouchableWrapper>
             {expanded && <View style={styles.content}>{children}</View>}
         </View>
     );

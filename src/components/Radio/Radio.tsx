@@ -1,6 +1,7 @@
-import {TouchableOpacity, View, type ViewProps} from "react-native";
+import {View, type ViewProps} from "react-native";
 import {theme} from "@/theme/colors";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Radio.styles";
 
 export type RadioButtonProps = {
@@ -21,8 +22,7 @@ export const RadioButton = ({
     const {accent, text} = theme();
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.7}
+        <TouchableWrapper
             onPress={onPress}
             disabled={disabled}
             style={[styles.container, disabled && styles.disabled, style]}
@@ -42,7 +42,7 @@ export const RadioButton = ({
             {label && (
                 <Text style={[styles.label, {color: text}]}>{label}</Text>
             )}
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };
 

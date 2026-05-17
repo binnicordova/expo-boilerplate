@@ -2,6 +2,7 @@ import type {TabTriggerSlotProps} from "expo-router/ui";
 import {forwardRef, type Ref} from "react";
 import {Pressable, type View} from "react-native";
 import {Icon, type IconProps} from "@/components/Icon/Icon";
+import {isTV} from "@/constants/platform";
 import {theme} from "@/theme/colors";
 import {FONT_SIZE} from "@/theme/fonts";
 import {Text} from "../Text/Text";
@@ -25,6 +26,12 @@ export const TabButton = forwardRef(
                         backgroundColor: isFocused ? accent : backgroundColor,
                     },
                 ]}
+                {...(isTV && {
+                    tvParallaxProperties: {
+                        enabled: true,
+                        magnification: 1.1,
+                    },
+                })}
             >
                 <Icon
                     name={icon}

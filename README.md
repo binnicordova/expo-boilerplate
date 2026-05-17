@@ -37,6 +37,23 @@ pnpm install
 pnpm start
 ```
 
+## tvOS Support (Apple TV)
+
+This boilerplate is now tvOS-safe at runtime (notifications and background tasks are disabled on TV devices).
+
+- Expo Go does not run on Apple TV (tvOS).
+- Use a Development Build for TV testing.
+- Keep using the same codebase for iOS, Android, Web, and tvOS.
+
+Recommended TV flow:
+
+```sh
+pnpm install
+pnpm ios
+```
+
+Then select an Apple TV simulator/device from Xcode tooling when launching the iOS native project.
+
 ## Helpful commands
 
 - **Preview on a device**: `pnpm run eas-preview`

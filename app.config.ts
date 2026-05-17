@@ -43,7 +43,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
     scheme: getScheme(),
     slug: EAS_SLUG,
     version: VERSION,
-    orientation: "portrait",
+    orientation: "default",
     icon: "./assets/icon.png",
     newArchEnabled: true,
     splash: {

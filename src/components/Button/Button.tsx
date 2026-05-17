@@ -1,9 +1,16 @@
-import {Text, TouchableOpacity, type TouchableOpacityProps} from "react-native";
+import {
+    type PressableProps,
+    type StyleProp,
+    Text,
+    type ViewStyle,
+} from "react-native";
 import {theme} from "@/theme/colors";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Button.styles";
 
-export type ButtonProps = TouchableOpacityProps & {
+export type ButtonProps = Omit<PressableProps, "style"> & {
     title: string;
+    style?: StyleProp<ViewStyle>;
 };
 
 export const Button = ({
@@ -15,7 +22,7 @@ export const Button = ({
 }: ButtonProps) => {
     const {background: color, accent: backgroundColor} = theme();
     return (
-        <TouchableOpacity
+        <TouchableWrapper
             {...props}
             style={[
                 styles.container,
@@ -27,6 +34,6 @@ export const Button = ({
             disabled={disabled}
         >
             <Text style={[styles.text, {color}]}>{title}</Text>
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };

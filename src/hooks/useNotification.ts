@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import {router} from "expo-router";
 import {Alert, Linking, Platform} from "react-native";
+import {isTV} from "@/constants/platform";
 import {PATHS} from "@/constants/routes";
 import {STORAGE_ID} from "@/constants/storage";
 import {STRINGS} from "@/constants/strings";
@@ -28,6 +29,8 @@ const handleNotificationConfig = {
 };
 
 export const initNotification = () => {
+    if (isTV) return;
+
     const registerForPushNotificationsAsync = async () => {
         if (Platform.OS === "android") {
             await Notifications.setNotificationChannelAsync(

@@ -1,5 +1,6 @@
 import {StyleSheet} from "react-native";
 import {initialWindowMetrics} from "react-native-safe-area-context";
+import {isTV} from "@/constants/platform";
 import {BORDER, RADIUS} from "@/theme/border";
 import {SPACING} from "@/theme/spacing";
 
@@ -12,8 +13,8 @@ const insets = initialWindowMetrics?.insets ?? {
 
 export const styles = StyleSheet.create({
     safeArea: {
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
+        paddingTop: isTV ? 0 : insets.top,
+        paddingBottom: isTV ? 0 : insets.bottom,
     },
     baseLayer: {
         flex: 1,
@@ -44,6 +45,14 @@ export const styles = StyleSheet.create({
         borderRadius: RADIUS[5],
         borderWidth: BORDER[1],
         overflow: "hidden",
+    },
+    tvFocusedCard: {
+        borderWidth: BORDER[1],
+        shadowColor: "#000",
+        shadowOpacity: 0.18,
+        shadowRadius: 8,
+        shadowOffset: {width: 0, height: 2},
+        elevation: 3,
     },
     listItem: {
         paddingHorizontal: SPACING[3],

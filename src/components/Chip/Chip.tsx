@@ -1,15 +1,17 @@
-import {TouchableOpacity, type TouchableOpacityProps} from "react-native";
+import type {PressableProps, StyleProp, ViewStyle} from "react-native";
 import {theme} from "@/theme/colors";
 import {Icon} from "../Icon/Icon";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Chip.styles";
 
-export type ChipProps = TouchableOpacityProps & {
+export type ChipProps = Omit<PressableProps, "style"> & {
     label: string;
     selected?: boolean;
     onPress?: () => void;
     onClose?: () => void;
     icon?: string;
+    style?: StyleProp<ViewStyle>;
 };
 
 export const Chip = ({
@@ -24,8 +26,7 @@ export const Chip = ({
     const {accent, text, background, lightness} = theme();
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.7}
+        <TouchableWrapper
             onPress={onPress}
             style={[
                 styles.container,
@@ -49,7 +50,7 @@ export const Chip = ({
                 {label}
             </Text>
             {onClose && (
-                <TouchableOpacity
+                <TouchableWrapper
                     onPress={onClose}
                     hitSlop={10}
                     testID="chip-close-button"
@@ -60,8 +61,8 @@ export const Chip = ({
                         color={selected ? background : text}
                         style={styles.closeIcon}
                     />
-                </TouchableOpacity>
+                </TouchableWrapper>
             )}
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };
