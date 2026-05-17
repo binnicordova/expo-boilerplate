@@ -1,23 +1,37 @@
 import type React from "react";
-import {TouchableOpacity, View} from "react-native";
+import type {StyleProp, ViewStyle} from "react-native";
+import {View} from "react-native";
+import {isTV} from "@/constants/platform";
 import type {Article} from "@/models/article";
 import {theme} from "@/theme/colors";
 import {Icon} from "../Icon/Icon";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./NewsListItem.styles";
 
 export type NewsListItemProps = {
     item: Article;
     onPress?: () => void;
+    onFocus?: () => void;
+    hasTVPreferredFocus?: boolean;
+    focusedStyle?: StyleProp<ViewStyle>;
 };
 
-export const NewsListItem: React.FC<NewsListItemProps> = ({item, onPress}) => {
+export const NewsListItem: React.FC<NewsListItemProps> = ({
+    item,
+    onPress,
+    onFocus,
+    hasTVPreferredFocus,
+    focusedStyle,
+}) => {
     const {background} = theme();
     return (
-        <TouchableOpacity
+        <TouchableWrapper
             style={[styles.card, {backgroundColor: background}]}
-            activeOpacity={0.7}
             onPress={onPress}
+            onFocus={onFocus}
+            hasTVPreferredFocus={isTV && hasTVPreferredFocus}
+            focusedStyle={focusedStyle}
         >
             <View style={styles.row}>
                 <View style={{flex: 1}}>
@@ -44,6 +58,6 @@ export const NewsListItem: React.FC<NewsListItemProps> = ({item, onPress}) => {
                 </View>
                 <Icon name="chevron-right" size={30} />
             </View>
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };

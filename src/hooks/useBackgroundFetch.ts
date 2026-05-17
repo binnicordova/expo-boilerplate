@@ -1,5 +1,6 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
+import {isTV} from "@/constants/platform";
 import {fetchArticlesTask, notifyMatchHits, TASKS} from "@/tasks";
 
 const TASK_INTERVAL = 15;
@@ -11,6 +12,8 @@ TaskManager.defineTask(TASKS.FETCH_ARTICLES, fetchArticlesTask);
 TaskManager.defineTask(TASKS.NOTIFY_MATCH_HITS, notifyMatchHits);
 
 export const initBackgroundFetch = async () => {
+    if (isTV) return;
+
     const status = await BackgroundTask.getStatusAsync();
     if (status === BackgroundTask.BackgroundTaskStatus.Available) {
         await BackgroundTask.registerTaskAsync(

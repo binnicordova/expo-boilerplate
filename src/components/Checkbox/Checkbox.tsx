@@ -1,14 +1,16 @@
-import {TouchableOpacity, type TouchableOpacityProps} from "react-native";
+import type {PressableProps, StyleProp, ViewStyle} from "react-native";
 import {theme} from "@/theme/colors";
 import {Icon} from "../Icon/Icon";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Checkbox.styles";
 
-export type CheckboxProps = TouchableOpacityProps & {
+export type CheckboxProps = Omit<PressableProps, "style"> & {
     checked: boolean;
     onChange: (checked: boolean) => void;
     label?: string;
     disabled?: boolean;
+    style?: StyleProp<ViewStyle>;
 };
 
 export const Checkbox = ({
@@ -28,8 +30,7 @@ export const Checkbox = ({
     };
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.7}
+        <TouchableWrapper
             onPress={handlePress}
             disabled={disabled}
             style={[styles.container, disabled && styles.disabled, style]}
@@ -43,6 +44,6 @@ export const Checkbox = ({
             {label && (
                 <Text style={[styles.label, {color: text}]}>{label}</Text>
             )}
-        </TouchableOpacity>
+        </TouchableWrapper>
     );
 };

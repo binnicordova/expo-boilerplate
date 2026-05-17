@@ -1,12 +1,14 @@
 import {FlashList} from "@shopify/flash-list";
 import {router} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
-import {useEffect} from "react";
-import {RefreshControl, TouchableOpacity, View} from "react-native";
+import {useEffect, useState} from "react";
+import {RefreshControl, View} from "react-native";
 import {AppBar} from "@/components/AppBar/AppBar";
 import {Button} from "@/components/Button/Button";
 import {Icon} from "@/components/Icon/Icon";
 import {Text} from "@/components/Text/Text";
+import {TouchableWrapper} from "@/components/TouchableWrapper/TouchableWrapper";
+import {isTV} from "@/constants/platform";
 import {PATHS} from "@/constants/routes";
 import {STRINGS} from "@/constants/strings";
 import type {Category} from "@/models/category";
@@ -32,6 +34,7 @@ type ItemProps = {
 
 const HomeScreen = () => {
     const {text, background, accent} = theme();
+    const [focusedCategory, setFocusedCategory] = useState<string | null>(null);
 
     const categories = useAtomValue(categoriesAtom);
     const favoriteCategories = useAtomValue(favoriteCategoriesAtom);
@@ -44,6 +47,11 @@ const HomeScreen = () => {
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
+
+    useEffect(() => {
+        if (!isTV || focusedCategory || categories.length === 0) return;
+        setFocusedCategory(categories[0].name);
+    }, [categories, focusedCategory]);
 
     const skip = () =>
         router.push(
@@ -66,7 +74,7 @@ const HomeScreen = () => {
             <AppBar
                 title=""
                 actions={() => (
-                    <TouchableOpacity onPress={skip}>
+                    <TouchableWrapper onPress={skip}>
                         <Text type="label">
                             See author, Binni Cordova, on LinkedIn
                             <Icon
@@ -74,7 +82,7 @@ const HomeScreen = () => {
                                 size={FONT_SIZE[3]}
                             />
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableWrapper>
                 )}
             />
             <View style={styles.body}>
@@ -91,21 +99,28 @@ const HomeScreen = () => {
 
     const renderItem = ({item, index}: ItemProps) => {
         const isFavorite = favoriteCategories.includes(item.name);
+        const isFocused = focusedCategory === item.name;
         const backgroundColor = isFavorite ? accent : background;
         const color = isFavorite ? background : text;
         return (
-            <TouchableOpacity
-                onPress={() => toggleFavoriteCategory(item)}
+            <TouchableWrapper
+                onFocus={() => setFocusedCategory(item.name)}
+                hasTVPreferredFocus={isTV && isFocused}
+                onPress={() => {
+                    setFocusedCategory(item.name);
+                    toggleFavoriteCategory(item);
+                }}
                 style={[
                     styles.masonryCard,
                     {backgroundColor, borderColor: color},
                 ]}
+                focusedStyle={[styles.tvFocusedCard, {borderColor: accent}]}
             >
                 <Icon name={item.icon} size={FONT_SIZE[10]} color={color} />
                 <Text type="label" key={index} style={{color}}>
                     {item.name}
                 </Text>
-            </TouchableOpacity>
+            </TouchableWrapper>
         );
     };
 

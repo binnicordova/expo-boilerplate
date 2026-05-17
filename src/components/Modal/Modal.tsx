@@ -1,7 +1,8 @@
 import type {ReactNode} from "react";
-import {Modal as RNModal, TouchableOpacity, View} from "react-native";
+import {Modal as RNModal, View} from "react-native";
 import {theme} from "@/theme/colors";
 import {Text} from "../Text/Text";
+import {TouchableWrapper} from "../TouchableWrapper/TouchableWrapper";
 import {styles} from "./Modal.styles";
 
 export type ModalProps = {
@@ -28,14 +29,13 @@ export const Modal = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            <TouchableOpacity
+            <TouchableWrapper
                 testID="modal-overlay"
                 style={styles.overlay}
-                activeOpacity={1}
                 onPress={onClose}
             >
                 <View style={[styles.content, {backgroundColor: background}]}>
-                    <TouchableOpacity activeOpacity={1}>
+                    <TouchableWrapper onPress={() => {}}>
                         {title && (
                             <View style={styles.header}>
                                 <Text type="title" style={styles.title}>
@@ -45,9 +45,9 @@ export const Modal = ({
                         )}
                         <View style={styles.body}>{children}</View>
                         {footer && <View style={styles.footer}>{footer}</View>}
-                    </TouchableOpacity>
+                    </TouchableWrapper>
                 </View>
-            </TouchableOpacity>
+            </TouchableWrapper>
         </RNModal>
     );
 };

@@ -1,7 +1,8 @@
 import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from "@react-navigation/native";
-import {TouchableOpacity, View} from "react-native";
+import {View} from "react-native";
 import {Text} from "@/components/Text/Text";
+import {TouchableWrapper} from "@/components/TouchableWrapper/TouchableWrapper";
 import {FONT_SIZE} from "@/theme/fonts";
 import {styles} from "./AppBar.styles";
 
@@ -21,9 +22,9 @@ export const AppBar: React.FC<AppBarProps> = ({
     return (
         <View style={styles.container}>
             {navigation.canGoBack() && (
-                <TouchableOpacity onPress={handleBackPress}>
+                <TouchableWrapper onPress={handleBackPress}>
                     <Ionicons size={FONT_SIZE[3]} name="chevron-back-outline" />
-                </TouchableOpacity>
+                </TouchableWrapper>
             )}
             <Text type="label" numberOfLines={2} style={styles.title}>
                 {title}
