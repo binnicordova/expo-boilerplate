@@ -10,16 +10,15 @@ Crafted by an Expo developer with over 8 years of experience, this is a short, e
 
 ## Quick start
 
-1. Clone the repository:
+1. Create your new app from this template (keeps `.github`, removes git history):
 
 ```sh
-git clone https://github.com/binnicordova/expo-boilerplate.git
-cd expo-boilerplate_binnicordova
+git clone --depth 1 https://github.com/binnicordova/expo-boilerplate.git my-app && cd my-app && rm -rf .git && git init
 ```
 
-or, Use the --template to create a new Expo project:
+> This is the recommended way for this repository template: you keep AI Skills, prompts, and instruction files, and start your own fresh git repository with no previous commits.
 
-> **Note**: This will remove the AI Skills, prompts, and instruction files. I recommend using the `git clone` option instead if you want a fully configured project.
+If you use `create-expo --template`, some template files (including AI setup under `.github`) can be skipped:
 
 ```sh
 pnpx create-expo --template https://github.com/binnicordova/expo-boilerplate
