@@ -14,7 +14,8 @@
             "!**/build",
             "!**/coverage",
             "!**/.rnstorybook/storybook.requires.ts",
-            "!**/.expo"
+            "!**/.expo",
+            "!**/public"
         ]
     },
     "formatter": {

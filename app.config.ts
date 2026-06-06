@@ -10,19 +10,19 @@ const VERSION_CODE = 6;
 
 const APP_VARIANTS = {
     development: {
-        identifier: "com.expo.dev",
+        identifier: "com.expofs.dev",
         name: "Expo (Dev)",
-        scheme: "dev.expo.com",
+        scheme: "dev.expofs.com",
     },
     preview: {
-        identifier: "com.expo.preview",
+        identifier: "com.expofs.preview",
         name: "Expo (Preview)",
-        scheme: "preview.expo.com",
+        scheme: "preview.expofs.com",
     },
     production: {
-        identifier: "com.expo",
+        identifier: "com.expofs",
         name: "Expo",
-        scheme: "expo.com",
+        scheme: "expofs.com",
     },
 };
 

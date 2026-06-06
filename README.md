@@ -1,8 +1,14 @@
 ![Expo React Native Boilerplate](./resources/expo-rn-boilerplate_bcordova.gif)
 
-# Expo Boilerplate v0.0.6 — Simple & Friendly by [binnicordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
+<p align="center">
+  <img src="./resources/store_1.png" width="32%" />
+  <img src="./resources/store_2.png" width="32%" />
+  <img src="./resources/store_3.png" width="32%" />
+</p>
 
-Crafted by an Expo developer with over 8 years of experience, this is a short, easy-to-understand starter for building mobile apps with Expo + React Native. Version **v0.0.6** now includes built-in **AI Agent Skills** designed to accelerate development, control AI generation for higher quality output, and enforce clean code standards automatically. 
+# Expo Boilerplate v0.0.6 — Simple & Friendly by [BinniCordova.com](https://binnicordova.com) [LinkedIn](https://www.linkedin.com/in/binnicordova)
+
+I've crafted this boilerplate using my 8+ years of experience as an Expo developer. It's a short, easy-to-understand starter for building mobile apps with Expo + React Native. Version **v0.0.6** now includes built-in **AI Agent Skills** I've designed to accelerate your development, control AI generation for higher quality output, and enforce clean code standards automatically. 
 
 **Who is this for?**
 - Product people and designers who want a quick overview.
@@ -10,16 +16,15 @@ Crafted by an Expo developer with over 8 years of experience, this is a short, e
 
 ## Quick start
 
-1. Clone the repository:
+1. Create your new app from my template (keeps `.github`, removes git history):
 
 ```sh
-git clone https://github.com/binnicordova/expo-boilerplate.git
-cd expo-boilerplate_binnicordova
+git clone --depth 1 https://github.com/binnicordova/expo-boilerplate.git my-app && cd my-app && rm -rf .git && git init
 ```
 
-or, Use the --template to create a new Expo project:
+> This is the recommended way for this repository template: you keep my AI Skills, prompts, and instruction files, and start your own fresh git repository with no previous commits.
 
-> **Note**: This will remove the AI Skills, prompts, and instruction files. I recommend using the `git clone` option instead if you want a fully configured project.
+If you use `create-expo --template`, some template files (including AI setup under `.github`) can be skipped:
 
 ```sh
 pnpx create-expo --template https://github.com/binnicordova/expo-boilerplate
@@ -37,22 +42,25 @@ pnpm install
 pnpm start
 ```
 
-## tvOS Support (Apple TV)
+## TV Support (Apple TV & Android TV)
 
-This boilerplate is now tvOS-safe at runtime (notifications and background tasks are disabled on TV devices).
+I've made this boilerplate safe for TV devices at runtime (notifications and background tasks are disabled). It supports:
+- **Apple TV** (tvOS)
+- **Android TV** and **Google TV**
+- Compatible devices like **Fire TV**, **Nvidia Shield**, and **Chromecast with Google TV**, **Watch Onn TV**.
 
-- Expo Go does not run on Apple TV (tvOS).
+- Expo Go does not run on TV devices.
 - Use a Development Build for TV testing.
-- Keep using the same codebase for iOS, Android, Web, and tvOS.
+- Keep using the same codebase for iOS, Android, Web, and TV.
 
 Recommended TV flow:
 
 ```sh
 pnpm install
-pnpm ios
+pnpm ios # or pnpm android
 ```
 
-Then select an Apple TV simulator/device from Xcode tooling when launching the iOS native project.
+Then select your TV simulator or device from your native tooling.
 
 ## Helpful commands
 
@@ -61,13 +69,13 @@ Then select an Apple TV simulator/device from Xcode tooling when launching the i
 - **Browse stories on the web**: `pnpm run storybook:web` 🌐
 - **Run tests**: `pnpm run test`
 
-## Where to look in the code (Project Structure)
+## Where to look in my code (Project Structure)
 
-This project follows a clear and scalable structure inside the `src/` directory:
+My project follows a **SCREAMING ARCHITECTURE**, where the folder structure clearly communicates the intent and domain of the application rather than just technical details. It includes:
 
 - 📂 **Main code**: `src/`
 - 📱 **App screens**: `src/app/` (Expo Router file-based routing)
-- 🧩 **Shared components**: `src/components/` (Reusable UI elements)
+- 🧩 **Shared components**: `src/components/` (Follows **ATOMIC DESIGN** methodology)
 - 📦 **State management**: `src/stores/` (Global state using Jotai)
 - 🎣 **Hooks**: `src/hooks/` (Custom React hooks)
 - 🎨 **Theme & Styles**: `src/theme/` and `src/styles/` (Design tokens and global styles)
@@ -75,13 +83,14 @@ This project follows a clear and scalable structure inside the `src/` directory:
 
 ## Technical Stack Details (Architecture)
 
-This project is built with a modern and robust stack:
+I've built this project with a modern and robust stack:
 
 - **Framework**: Expo / React Native
 - **Language**: TypeScript
 - **Navigation**: Expo Router (File-based routing)
 - **State Management**: Jotai (Atomic state)
 - **Styling**: Styled Components / StyleSheet
+- **Design Pattern**: Atomic Design for components (Atoms, Molecules, Organisms)
 - **Testing**: Jest
 
 ## Deployment (AppStore / PlayStore / Web)
@@ -106,47 +115,94 @@ To reset the project and remove all example code, run the following command:
 pnpm run reset-project
 ```
 
-**Generate Assets:**
-Generate the Assets to the app and Stores with simple script:
+**Generate Branding Assets:**
+To generate all required app icons and store assets, simply provide a square `logo.png` or `logo.svg` (recommend 1024x1024) in the `scripts/` folder and run:
 ```sh
 pnpm run generate:branding
 ```
+This script asks you the image path, and automatically populates all different required sizes and splashes for Expo and the App/Play Stores.
 
 ## 🤖 AI Agent Skills & Automation
 
-This boilerplate is uniquely optimized for AI-assisted development. It includes **Specialized Agent Skills** (located in `.github/skills/`) that teach your AI assistant (Copilot, Cursor, etc.) how to:
+This boilerplate is uniquely optimized for **Agentic Workflows**. I've included **Specialized Agent Skills** (located in `.github/skills/`) that transform your AI assistant (Copilot, Cursor, etc.) from a simple completion tool into a domain expert that knows how to:
 
-- 🚀 **Accelerate Coding**: Get from idea to implementation faster with domain-specific knowledge.
-- 🎯 **Control Generation**: Ensure the AI follows the exact technical standards of this project (Jotai, Expo Router, Biome).
-- 🧹 **Perform Clean Code**: Automatic enforcement of modular architecture and technical debt prevention.
-- ⏱️ **Save Time**: Reduce manual research by providing the AI with immediate project context.
+- 🚀 **Accelerate Development**: Use Context-Augmented Generation (RAG) to implement features based on this project's specific modular patterns.
+- 🎯 **Enforce Standards**: Prevent the AI from hallucinating or using outdated libraries by anchoring it to our technical stack (Jotai, Expo Router, Biome).
+- 🧹 **Automate Quality**: Handle repetitive tasks like unit test generation and README documentation via specialized prompt engineering.
+- ⏱️ **Zero Research**: Eliminate the need for the AI to "guess" folder locations or configuration details.
 
-### How to use
-Use the AI powerups by typing "#" and selecting the prompt or skill in your AI chatbox editor:
+### Cross-AI Compatibility
+My Agent Skills and Prompts are precision-engineered for:
+- ✅ **GitHub Copilot** (Optimized for `@workspace` and `#file` references)
+- ✅ **Cursor** (Deep integration with `.cursorrules` and Composer)
+- ✅ **Claude Dev / Roo Code** (High-autonomy agentic prompts)
+- ✅ **Open Claude** (System-level instructions for zero-shot quality)
+- ✅ **Windsurf** (Flow-based AI orchestration)
+
+### How to use AI
+You can manually trigger these AI powerups by typing "#" and selecting the prompt or skill. 
+
+> **Pro Tip**: In advanced agents (like GitHub Copilot or Cursor), these skills are often **triggered automatically**. The agent scans your workspace, detects these instruction files, and applies them to its context window before you even ask.
 
 ```
-#expo-architect       - Modular architecture and technical standards
-#building-ui          - Guide for Native UI, animations, and icons
-#api-routes           - Serverless API development workflows
-#deployment           - App Store and Play Store submission guide
-#upgrading-expo       - SDK update patterns and dependency fixes
+#expo-architect       - Design modular systems using Screaming Architecture
+#building-ui          - Create pixel-perfect Native UI with Atomic Design
+#api-routes           - Build scalable Serverless API handlers
+#deployment           - Orchestrate App Store & Play Store submissions
+#upgrading-expo       - Handle SDK migrations and dependency conflict resolution
 ```
 
 **Automation Prompts:**
 ```
-#EXPO-RELEASE-NEXT-VERSION.prompt.md
-#EXPO-TEST-CREATE.prompt.md
-#EXPO-DOC-README-CREATE.prompt
+#EXPO-RELEASE-NEXT-VERSION.prompt.md  - Automate versioning and changelogs
+#EXPO-TEST-CREATE.prompt.md           - Generate 100% coverage unit tests
+#EXPO-DOC-README-CREATE.prompt        - Self-documenting codebase updates
+#CREATE-PR.prompt.md                  - Generate professional PR descriptions
 ```
+
+## How to create a new APP product, by Binni Cordova
+
+I leverage a high-velocity AI workflow to transform concepts into scaled products in record time:
+
+1. **Strategic Discovery with AI**: I start by using AI (Gemini/ChatGPT/DeepSeek) to analyze the business concept and refine the Requirements. I research potential competitors to identify market gaps and define the "Unfair Advantage" I will build into my code.
+2. **AI-First Design**: I utilize [**STICH Google AI**](https://stitch.withgoogle.com) (Gemma/Gemini) to generate high-fidelity design strategies. I don't just ask for "a UI"—I ask for a design system that works with Expo's primitives.
+3. **Agentic Scaffolding**: I use **GitHub Copilot** or **Cursor** to modify this boilerplate. I ALWAYS anchor the session to my custom **Agent Skills** (like `#expo-architect`) to ensure every line of code generated follows the **Screaming Architecture** and **Atomic Design** principles from day one, based on the generated AI design.
+4. **Res resilient Modeling**: Before writing UI, I define my data models and Jotai atoms. I use the AI to generate the `src/models/` and `src/stores/` layers, creating a type-safe foundation for the entire app.
+5. **Continuous CI/CD (EAS)**: I generate builds using **EAS**. I use `pnpm run build:prod` (or `bun run build:prod`) to push to the cloud, letting the CI handle the heavy lifting while I continue developing.
+6. **The "No-Wait" Release (OTA)**: Traditional store reviews kill momentum. I bypass them for UI tweaks and logic fixes using **Over-the-Air (OTA)** updates via `pnpm run update:prod` (or `bun run update:prod`), pushing changes directly to users in seconds.
+7. **KPI-Driven Iteration**: I monitor analytics and use AI to transform raw user data into actionable feature requests or bug fixes, maintaining a constant state of improvement.
+
+## 🚀 What you can build with this Boilerplate
+
+I designed this architecture to be versatile enough to power the next generation of high-growth startups. Here are some ideal use cases:
+
+- **AI-Native SaaS**:
+  - *Examples*: "Chat with your Data" apps, Personal AI Agents, Automated Content Generators, AI Writing Assistants, Intelligent Research Tools, Coding Copilots, AI Image Editors.
+- **Fintech & Digital Wallets**:
+  - *Examples*: Neobanks, Crypto Wallets, Expense Trackers, Portfolio Managers, Split-Bill Apps, Micro-Lending Platforms, Payroll Management, Stock/Forex Analyzers.
+- **On-Demand Marketplaces**:
+  - *Examples*: Food/Grocery Delivery, Professional Service Platforms (Handymen, Cleaners), Ride-Sharing, Real-Time Peer-to-Peer Rentals, Freelance Talent Hubs.
+- **Healthcare & Wellness**:
+  - *Examples*: Patient Portals, Medication Reminders, Fitness Trackers, Meditation Apps, Mental Health Journals, Telemedicine Platforms, Nutrition & Macro Trackers.
+- **Smart Home (IoT)**:
+  - *Examples*: Smart Lighting Controllers, Home Security Dashboards, Energy Consumption Monitors, Appliance Hubs, Garden Automation Systems.
+- **EdTech Platforms**:
+  - *Examples*: Language Learning Apps, Skill-Based Video Courses, Interactive Flashcards, Student Management Systems, Test Preparation Hubs, Coding Bootcamps.
+- **Enterprise Companion Apps**:
+  - *Examples*: Field Service CRM, Inventory Managers, Internal Employee Portals, Warehouse Logistics Trackers, Sales Enablement Tools, Task Management for Teams.
+- **Travel & Real Estate**:
+  - *Examples*: Itinerary Planners, Property Search & Virtual Tours, Booking Engines, Local Discovery Guides, House Hunting Checklists.
+- **E-commerce & Social**:
+  - *Examples*: Boutique Shopping Apps, Community Discussion Boards, Interest-Based Social Networks, Event Planning Hubs, Membership Clubs.
 
 ## 📬 Connect with Binni Cordova
 
 PortFolio
-- [binnicordova.com](https://binnicordova.com)
+- [BinniCordova.com](https://binnicordova.com)
 
 Feel free to reach out if you have any questions or need support. Call [ +1 (650) 374-4225 ](tel:+16503744225) and ask for Binni Cordova.
 
-Contact him:
+Contact me:
 - [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-%230072b1?logo=linkedin)](https://www.linkedin.com/in/binnicordova)
 - [![Calendar](https://img.shields.io/badge/Calendar-Book%20a%20Meeting-%23FF7F50?logo=google-calendar)](https://calendly.com/binnizenobiocordovaleandro/meet)
 - [![GitHub](https://img.shields.io/badge/GitHub-Profile-%23808080?logo=github)](https://github.com/binnizenobiocordovaleandro)

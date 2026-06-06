@@ -24,3 +24,10 @@ coverage/
 .env
 .env.local
 *.env
+
+# public
+public/
+
+#firebase
+.firebase*
+firebase.*
