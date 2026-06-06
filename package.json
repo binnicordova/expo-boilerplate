@@ -3,6 +3,9 @@
     "version": "0.0.6",
     "main": "./src/AppEntry.tsx",
     "license": "MIT",
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "scripts": {
         "start": "expo start --clear",
         "dev": "APP_VARIANT=development npx expo start",
