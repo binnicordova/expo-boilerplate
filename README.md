@@ -17,10 +17,10 @@ I've crafted this boilerplate using my 8+ years of experience as an Expo develop
 ## Quick start
 
 1. Prerequisites:
+- **Bun**: v1.1 or newer (Our recommended and favorite manager)
 - **Node.js**: v20 or newer (LTS recommended)
-- **pnpm** or **bun** (preferred over npm/yarn)
 
-2. Create your new app from my template (keeps `.github`, removes git history):
+1. Create your new app from my template (keeps `.github`, removes git history):
 
 ```sh
 git clone --depth 1 https://github.com/binnicordova/expo-boilerplate.git my-app && cd my-app && rm -rf .git && git init
@@ -31,20 +31,28 @@ git clone --depth 1 https://github.com/binnicordova/expo-boilerplate.git my-app 
 If you use `create-expo --template`, some template files (including AI setup under `.github`) can be skipped:
 
 ```sh
-pnpx create-expo --template https://github.com/binnicordova/expo-boilerplate
+bunx create-expo --template https://github.com/binnicordova/expo-boilerplate
 ```
+or use pnpx, npx, yarn...
 
 2. Install dependencies:
 
 ```sh
-pnpm install
+bun install
 ```
 
 3. Run and preview on your iPhone or Android device (scan the QR in Expo Go):
 
 ```sh
-pnpm start
+bun start
 ```
+Download [Expo Go Android](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en_US) or
+[Expo Go iPhone](https://apps.apple.com/us/app/expo-go/id982107779)
+
+4. Optionally, launch on devices or emulators from the terminal:
+- Press **i** to open on iOS simulator.
+- Press **a** to open on Android emulator.
+- Press **w** to open on web browser.
 
 ## TV Support (Apple TV & Android TV)
 
@@ -60,18 +68,18 @@ I've made this boilerplate safe for TV devices at runtime (notifications and bac
 Recommended TV flow:
 
 ```sh
-pnpm install
-pnpm ios # or pnpm android
+bun install
+bun ios # or bun android
 ```
 
 Then select your TV simulator or device from your native tooling.
 
 ## Helpful commands
 
-- **Preview on a device**: `pnpm run eas-preview`
-- **Run component stories**: `pnpm run storybook:start`
-- **Browse stories on the web**: `pnpm run storybook:web` 🌐
-- **Run tests**: `pnpm run test`
+- **Preview on a device**: `bun run eas-preview`
+- **Run component stories**: `bun run storybook:start`
+- **Browse stories on the web**: `bun run storybook:web` 🌐
+- **Run tests**: `bun run test`
 
 ## Where to look in my code (Project Structure)
 
@@ -103,12 +111,12 @@ When you’re ready to publish, use **EAS (Expo Application Services)**:
 
 **Build for Production:**
 ```sh
-pnpm run build:prod
+bun run build:prod
 ```
 
 **Update over the Air (OTA):**
 ```sh
-pnpm run update:prod
+bun run update:prod
 ```
 
 ## Reset Project & Tools
@@ -116,13 +124,13 @@ pnpm run update:prod
 **Reset the Project:**
 To reset the project and remove all example code, run the following command:
 ```sh
-pnpm run reset-project
+bun run reset-project
 ```
 
 **Generate Branding Assets:**
 To generate all required app icons and store assets, simply provide a square `logo.png` or `logo.svg` (recommend 1024x1024) in the `scripts/` folder and run:
 ```sh
-pnpm run generate:branding
+bun run generate:branding
 ```
 This script asks you the image path, and automatically populates all different required sizes and splashes for Expo and the App/Play Stores.
 
@@ -172,8 +180,8 @@ I leverage a high-velocity AI workflow to transform concepts into scaled product
 2. **AI-First Design**: I utilize [**STICH Google AI**](https://stitch.withgoogle.com) (Gemma/Gemini) to generate high-fidelity design strategies. I don't just ask for "a UI"—I ask for a design system that works with Expo's primitives.
 3. **Agentic Scaffolding**: I use **GitHub Copilot** or **Cursor** to modify this boilerplate. I ALWAYS anchor the session to my custom **Agent Skills** (like `#expo-architect`) to ensure every line of code generated follows the **Screaming Architecture** and **Atomic Design** principles from day one, based on the generated AI design.
 4. **Res resilient Modeling**: Before writing UI, I define my data models and Jotai atoms. I use the AI to generate the `src/models/` and `src/stores/` layers, creating a type-safe foundation for the entire app.
-5. **Continuous CI/CD (EAS)**: I generate builds using **EAS**. I use `pnpm run build:prod` (or `bun run build:prod`) to push to the cloud, letting the CI handle the heavy lifting while I continue developing.
-6. **The "No-Wait" Release (OTA)**: Traditional store reviews kill momentum. I bypass them for UI tweaks and logic fixes using **Over-the-Air (OTA)** updates via `pnpm run update:prod` (or `bun run update:prod`), pushing changes directly to users in seconds.
+5. **Continuous CI/CD (EAS)**: I generate builds using **EAS**. I use `bun run build:prod` to push to the cloud, letting the CI handle the heavy lifting while I continue developing.
+6. **The "No-Wait" Release (OTA)**: Traditional store reviews kill momentum. I bypass them for UI tweaks and logic fixes using **Over-the-Air (OTA)** updates via `bun run update:prod`, pushing changes directly to users in seconds.
 7. **KPI-Driven Iteration**: I monitor analytics and use AI to transform raw user data into actionable feature requests or bug fixes, maintaining a constant state of improvement.
 
 ## 🚀 What you can build with this Boilerplate

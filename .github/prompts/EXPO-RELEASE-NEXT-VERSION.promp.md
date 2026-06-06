@@ -17,8 +17,8 @@ Please follow these steps to release the next version of the app:
         -   `build:prod`
         -   `build:prod:android`
         -   `build:prod:ios`
-    -   Run the selected command in the terminal (using `pnpm run <command>` or `npm run <command>`).
+    -   Run the selected command in the terminal (using `bun run <command>`).
 
 3.  **Update**:
     -   After the build command has been executed, run the production update command:
-        -   `pnpm run update:prod` or `npm run update:prod`
+        -   `bun run update:prod`

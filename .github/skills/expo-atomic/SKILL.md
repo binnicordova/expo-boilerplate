@@ -74,9 +74,9 @@ Specific instances of templates where the UI is rendered with real data and busi
 1.  **Identify the Level**: Determine if the new UI requirement is an Atom, Molecule, or Organism.
 2.  **Define Styles**: Use tokens from `src/theme/` in your `.styles.ts`.
 3.  **Implement**: Create the component following the Folder-per-Component pattern.
-4.  **Document**: Create a `.stories.tsx` file and run `pnpm storybook-generate` to validate visually.
+4.  **Document**: Create a `.stories.tsx` file and run `bun storybook-generate` to validate visually.
 5.  **Test**: Write unit tests in `.test.tsx` to ensure functionality and accessibility.
 
 ## Documentation
 
-All components across the atomic spectrum are documented in **Storybook**, which acts as our living design system documentation. Run `pnpm storybook:web` to explore the inventory.
+All components across the atomic spectrum are documented in **Storybook**, which acts as our living design system documentation. Run `bun storybook:web` to explore the inventory.

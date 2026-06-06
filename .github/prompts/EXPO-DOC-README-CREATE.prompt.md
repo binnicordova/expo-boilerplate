@@ -13,14 +13,14 @@ The structure should follow the formatting and sections of the provided example,
     *   **Target Audience**: Product people, designers, and developers.
 
 2.  **Quick Start**
-    *   Sequential steps for getting started quickly using `pnpm`.
-    *   **Create Project**: `pnpx create-expo --template ...`
-    *   **Install**: `pnpm install`
-    *   **Run**: `pnpm start` (with instructions to scan QR code).
+    *   Sequential steps for getting started quickly using `bun`.
+    *   **Create Project**: `bunx create-expo --template ...`
+    *   **Install**: `bun install`
+    *   **Run**: `bun start` (with instructions to scan QR code).
 
 3.  **Helpful Commands**
     *   List specific useful commands identified in `package.json`.
-    *   Examples: `pnpm run eas-preview`, `pnpm run storybook:start`.
+    *   Examples: `bun run eas-preview`, `bun run storybook:start`.
 
 4.  **Project Structure (Where to look in the code)**
     *   Map the file system to a user-friendly guide.
@@ -39,12 +39,12 @@ The structure should follow the formatting and sections of the provided example,
     *   **Styling**: Styled Components / StyleSheet / Theme tokens.
 
 6.  **Deployment (AppStore / PlayStore / Web)**
-    *   **Build**: Instructions for EAS Build (`pnpm run build:prod`).
-    *   **Updates (OTA)**: Instructions for EAS Update (`pnpm run update:prod`).
+    *   **Build**: Instructions for EAS Build (`bun run build:prod`).
+    *   **Updates (OTA)**: Instructions for EAS Update (`bun run update:prod`).
 
 7.  **Reset Project & Tools**
-    *   Instructions for the custom reset script: `pnpm run reset-project`.
-    *   Instructions for asset generation: `pnpm run generate:branding`.
+    *   Instructions for the custom reset script: `bun run reset-project`.
+    *   Instructions for asset generation: `bun run generate:branding`.
 
 8.  **Connect & Support (Preserve Existing)**
     *   **Portfolio**: Link to binnicordova.com.
@@ -57,7 +57,7 @@ The structure should follow the formatting and sections of the provided example,
 *   **Preserve Branding**: Do NOT remove the "Binni Cordova" header, footer, or contact details.
 *   **Preserve Custom Scripts**: Ensure `reset-project` and `generate:branding` commands are documented.
 *   It must reflect the actual structure (`src/`, `assets/`) and scripts from `package.json`.
-*   Instructions must be copy-pasteable and verifyable (prefer `pnpm`).
+*   Instructions must be copy-pasteable and verifyable (prefer `bun`).
 
 ## Usage Example
 
