@@ -10,6 +10,7 @@
         "android": "expo start --android",
         "ios": "expo start --ios",
         "web": "expo start --web",
+        "build:web": "expo export --platform web --output-dir public",
         "build-storybook": "storybook build",
         "storybook-generate": "sb-rn-get-stories --config-path .rnstorybook",
         "storybook:start": "cross-env EXPO_PUBLIC_STORYBOOK_ENABLED='true' expo start --clear",
