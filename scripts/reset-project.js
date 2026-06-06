@@ -284,9 +284,7 @@ async function main() {
         console.log(`
 🚀  Run
 
-\`npx expo start\`
-or
-\`pnpm start\`
+\`bun start\`
 
 to begin your fresh project with this minimal setup.
 Enjoy building with my Expo Boilerplate! 🎉

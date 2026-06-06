@@ -91,7 +91,7 @@ src/components/MyComponent/
 
 ## Code Standards
 
-- **Formatting**: We use **Biome**. Run `pnpm format` to ensure code style compliance.
+- **Formatting**: We use **Biome**. Run `bun format` to ensure code style compliance.
 - **TypeScript**: Use path aliases (`@/`) to avoid deep relative paths (e.g., `../../../../utils`).
 - **Unit Testing**: 
   - Mandatory for components with logic, hooks, and stores.

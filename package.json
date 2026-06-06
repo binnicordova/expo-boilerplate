@@ -23,7 +23,7 @@
         "test": "jest --watch --coverage=false --changedSince=origin/main",
         "test:coverage": "jest --coverage",
         "testDebug": "jest -o --watch --coverage=false",
-        "testFinal": "pnpx jest",
+        "testFinal": "bunx jest",
         "testCoverage": "jest --coverage",
         "updateSnapshots": "jest -u --coverage=false",
         "format": "biome format --write --files-ignore-unknown=true && biome ci .",

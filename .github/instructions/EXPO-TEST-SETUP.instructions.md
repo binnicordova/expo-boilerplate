@@ -81,7 +81,7 @@ Configuration is located in `jest.config.ts`. It uses the `jest-expo` preset.
   "scripts": {
     "test": "jest --watch --coverage=false --changedSince=origin/main",
     "test:coverage": "jest --coverage",
-    "testFinal": "pnpx jest"
+    "testFinal": "bunx jest"
   }
 }
 ```
