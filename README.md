@@ -16,7 +16,11 @@ I've crafted this boilerplate using my 8+ years of experience as an Expo develop
 
 ## Quick start
 
-1. Create your new app from my template (keeps `.github`, removes git history):
+1. Prerequisites:
+- **Node.js**: v20 or newer (LTS recommended)
+- **pnpm** or **bun** (preferred over npm/yarn)
+
+2. Create your new app from my template (keeps `.github`, removes git history):
 
 ```sh
 git clone --depth 1 https://github.com/binnicordova/expo-boilerplate.git my-app && cd my-app && rm -rf .git && git init
