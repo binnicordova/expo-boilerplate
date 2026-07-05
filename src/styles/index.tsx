@@ -19,12 +19,6 @@ export const styles = StyleSheet.create({
     baseLayer: {
         flex: 1,
     },
-    centerLayer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: SPACING[3],
-    },
     body: {
         paddingHorizontal: SPACING[3],
     },
@@ -53,14 +47,5 @@ export const styles = StyleSheet.create({
         shadowRadius: 8,
         shadowOffset: {width: 0, height: 2},
         elevation: 3,
-    },
-    listItem: {
-        paddingHorizontal: SPACING[3],
-    },
-    metaContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: SPACING[2],
     },
 });

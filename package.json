@@ -79,8 +79,6 @@
         "@commitlint/config-conventional": "^19.8.0",
         "@expo/metro-runtime": "~6.1.2",
         "@react-native-async-storage/async-storage": "^2.2.0",
-        "@react-native-community/datetimepicker": "8.4.4",
-        "@react-native-community/slider": "5.0.1",
         "@storybook/addon-actions": "^8.5.3",
         "@storybook/addon-controls": "^8.5.3",
         "@storybook/addon-essentials": "^8.5.3",
