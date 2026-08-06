@@ -11,6 +11,7 @@ import {styles} from "./Button.styles";
 export type ButtonProps = Omit<PressableProps, "style"> & {
     title: string;
     style?: StyleProp<ViewStyle>;
+    textColor?: string;
 };
 
 export const Button = ({
@@ -18,6 +19,7 @@ export const Button = ({
     onPress,
     disabled,
     style,
+    textColor,
     ...props
 }: ButtonProps) => {
     const {background: color, accent: backgroundColor} = theme();
@@ -33,7 +35,9 @@ export const Button = ({
             onPress={disabled ? undefined : onPress}
             disabled={disabled}
         >
-            <Text style={[styles.text, {color}]}>{title}</Text>
+            <Text style={[styles.text, {color: textColor ?? color}]}>
+                {title}
+            </Text>
         </TouchableWrapper>
     );
 };

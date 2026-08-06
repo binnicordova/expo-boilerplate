@@ -1,50 +1,55 @@
 import * as BackgroundTask from "expo-background-task";
-import {getDefaultStore} from "jotai";
-import {articlesAtom, fetchArticlesAtom} from "@/stores/articlesStore";
-import {favoriteCategoriesAtom} from "@/stores/categoriesStore";
-import {getArticlesMatchs} from "@/utils/matcher";
+import {STORAGE_ID} from "@/constants/storage";
+import {api, type CertificationSyncPayload} from "@/services/api";
 import {scheduleLocalNotification} from "@/utils/notification";
+import {storage} from "@/utils/storage";
 
 export enum TASKS {
-    FETCH_ARTICLES = "fetch-articles",
-    NOTIFY_MATCH_HITS = "notify-match-hits",
+    NOTIFY_PENDING_QUIZ = "notify-pending-quiz",
+    SYNC_CERTIFICATIONS = "sync-certifications",
 }
 
-export const fetchArticlesTask = async () => {
+export const notifyMatchHits = async () => {
     try {
-        const store = getDefaultStore();
-        const result = await store.set(fetchArticlesAtom);
-
-        return result.success
-            ? BackgroundTask.BackgroundTaskResult.Success
-            : BackgroundTask.BackgroundTaskResult.Failed;
-    } catch (_error) {
+        const title = "New Quiz Available!";
+        const body = "Pasar un Quiz is key for your new interview preparation!";
+        await scheduleLocalNotification(title, body, {
+            task: TASKS.NOTIFY_PENDING_QUIZ,
+        });
+        return BackgroundTask.BackgroundTaskResult.Success;
+    } catch (error) {
+        console.error("Error notifying match hits:", error);
         return BackgroundTask.BackgroundTaskResult.Failed;
     }
 };
 
-export const notifyMatchHits = async () => {
+export const syncCertifications = async () => {
     try {
-        const store = getDefaultStore();
+        const certificationByUser = await storage.getItem<
+            Record<string, CertificationSyncPayload>
+        >(STORAGE_ID.certifications, {});
 
-        const articles = await store.get(articlesAtom);
-        if (!articles.length) return;
-
-        const favoriteCategories = await store.get(favoriteCategoriesAtom);
-
-        if (!articles.length || !favoriteCategories.length) return;
-
-        const matchedHits = getArticlesMatchs(articles, favoriteCategories);
-
-        if (matchedHits.length > 0) {
-            const message = `Found ${matchedHits.length} new articles!`;
-            await scheduleLocalNotification("New Articles Available", message, {
-                hits: matchedHits,
-            });
+        const certifications = Object.values(certificationByUser);
+        if (!certifications.length) {
+            return BackgroundTask.BackgroundTaskResult.Success;
         }
-        return BackgroundTask.BackgroundTaskResult.Success;
+
+        let failedCount = 0;
+
+        for (const certification of certifications) {
+            try {
+                await api.persistCertification(certification);
+            } catch (error) {
+                failedCount += 1;
+                console.error("Error syncing certification:", error);
+            }
+        }
+
+        return failedCount > 0
+            ? BackgroundTask.BackgroundTaskResult.Failed
+            : BackgroundTask.BackgroundTaskResult.Success;
     } catch (error) {
-        console.error("Error notifying match hits:", error);
+        console.error("Error loading certifications for sync:", error);
         return BackgroundTask.BackgroundTaskResult.Failed;
     }
 };

@@ -1,14 +1,23 @@
 import {render} from "@testing-library/react-native";
 import {Icon} from "./Icon";
 
-const ICON_ID = 1;
-
-jest.mock("@expo/vector-icons", () => ({
-    MaterialCommunityIcons: {
-        glyphMap: {home: ICON_ID},
-    },
-    createIconSet: jest.fn(() => "MaterialIconMock"),
-}));
+jest.mock("@react-native-vector-icons/ionicons", () => {
+    const React = require("react");
+    const {Text} = require("react-native");
+    return {
+        __esModule: true,
+        default: (props: Record<string, unknown>) => {
+            return React.createElement(
+                Text,
+                {
+                    testID: (props.testID as string) || (props.name as string),
+                    ...props,
+                },
+                "IconMock"
+            );
+        },
+    };
+});
 
 describe("Icon Component", () => {
     it("renders correctly with default props", () => {

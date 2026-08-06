@@ -48,4 +48,58 @@ export const styles = StyleSheet.create({
         shadowOffset: {width: 0, height: 2},
         elevation: 3,
     },
+    scroll: {
+        flex: 1,
+    },
+    quizContainer: {
+        flexGrow: 1,
+        paddingHorizontal: SPACING[4],
+        paddingVertical: SPACING[4],
+    },
+    quizContent: {
+        width: "100%",
+        alignSelf: "center",
+        gap: SPACING[4],
+    },
+    quizHeader: {
+        gap: SPACING[2],
+    },
+    quizCard: {
+        borderRadius: RADIUS[5],
+        borderWidth: BORDER[1],
+        padding: SPACING[4],
+        gap: SPACING[3],
+    },
+    contentTitle: {
+        textTransform: "uppercase",
+        letterSpacing: 0.6,
+    },
+    alternativesList: {
+        gap: SPACING[2],
+    },
+    alternativeButton: {
+        borderRadius: RADIUS[4],
+        borderWidth: BORDER[1],
+        paddingHorizontal: SPACING[3],
+        paddingVertical: SPACING[3],
+    },
+    controls: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: SPACING[3],
+    },
+    controlButton: {
+        flex: 1,
+    },
+    progressText: {
+        textAlign: "center",
+    },
+    centeredState: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: SPACING[3],
+        paddingHorizontal: SPACING[4],
+    },
 });

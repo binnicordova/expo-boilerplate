@@ -2,7 +2,7 @@ import {useFonts} from "expo-font";
 import {Slot} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {StatusBar} from "expo-status-bar";
-import {Provider} from "jotai";
+import {getDefaultStore, Provider} from "jotai";
 import {useEffect} from "react";
 import {View} from "react-native";
 import {styles} from "@/styles";
@@ -32,7 +32,7 @@ const RootLayout = () => {
     }
 
     return (
-        <Provider>
+        <Provider store={getDefaultStore()}>
             <View style={[styles.baseLayer, {backgroundColor: background}]}>
                 <StatusBar style="auto" />
                 <Slot />

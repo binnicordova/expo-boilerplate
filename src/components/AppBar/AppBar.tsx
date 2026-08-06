@@ -1,5 +1,5 @@
-import {Ionicons} from "@expo/vector-icons";
-import {useNavigation} from "@react-navigation/native";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import {useNavigation} from "expo-router";
 import {View} from "react-native";
 import {Text} from "@/components/Text/Text";
 import {TouchableWrapper} from "@/components/TouchableWrapper/TouchableWrapper";
