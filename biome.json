@@ -15,7 +15,8 @@
             "!**/coverage",
             "!**/.rnstorybook/storybook.requires.ts",
             "!**/.expo",
-            "!**/public"
+            "!**/public",
+            "!functions"
         ]
     },
     "formatter": {

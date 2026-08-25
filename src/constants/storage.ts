@@ -1,15 +1,27 @@
 type StorageIdType = {
-    categories: string;
-    favoriteCategories: string;
-    favoritesLastUpdated: string;
     notificationToken: string;
-    articles: string;
+    user: string;
+    certifications: string;
+    device: string;
+    progression: string;
+    streak: string;
+    reviewQueue: string;
+    challengeResults: string;
+    examAttempts: string;
+    notificationPreferences: string;
+    notificationDelivery: string;
 };
 
 export const STORAGE_ID: StorageIdType = {
-    categories: "categories",
-    favoriteCategories: "favoriteCategories",
-    favoritesLastUpdated: "favoritesLastUpdated",
     notificationToken: "notificationToken",
-    articles: "articles",
+    user: "user",
+    certifications: "certifications",
+    device: "device",
+    progression: "progression",
+    streak: "streak",
+    reviewQueue: "reviewQueue",
+    challengeResults: "challengeResults",
+    examAttempts: "examAttempts",
+    notificationPreferences: "notificationPreferences",
+    notificationDelivery: "notificationDelivery",
 };

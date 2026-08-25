@@ -1,9 +1,10 @@
 import {render} from "@testing-library/react-native";
 import {AppBar} from "./AppBar";
 
-jest.mock("@react-navigation/native", () => ({
+jest.mock("expo-router", () => ({
     useNavigation: jest.fn(() => ({
         canGoBack: jest.fn(() => false),
+        goBack: jest.fn(),
     })),
 }));
 

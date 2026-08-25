@@ -1,28 +1,37 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
 import {isTV} from "@/constants/platform";
-import {fetchArticlesTask, notifyMatchHits, TASKS} from "@/tasks";
+import {planEngagementNotifications, syncCertifications, TASKS} from "@/tasks";
 
-const TASK_INTERVAL = 15;
+const TASK_INTERVAL = 6 * 60;
 const TASK_CONFIGURATION: BackgroundTask.BackgroundTaskOptions = {
     minimumInterval: TASK_INTERVAL,
 };
 
-TaskManager.defineTask(TASKS.FETCH_ARTICLES, fetchArticlesTask);
-TaskManager.defineTask(TASKS.NOTIFY_MATCH_HITS, notifyMatchHits);
+if (!TaskManager.isTaskDefined(TASKS.PLAN_NOTIFICATIONS)) {
+    TaskManager.defineTask(
+        TASKS.PLAN_NOTIFICATIONS,
+        planEngagementNotifications
+    );
+}
+
+if (!TaskManager.isTaskDefined(TASKS.SYNC_CERTIFICATIONS)) {
+    TaskManager.defineTask(TASKS.SYNC_CERTIFICATIONS, syncCertifications);
+}
+
+const registerTaskIfNeeded = async (taskName: TASKS) => {
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(taskName);
+    if (!isRegistered) {
+        await BackgroundTask.registerTaskAsync(taskName, TASK_CONFIGURATION);
+    }
+};
 
 export const initBackgroundFetch = async () => {
     if (isTV) return;
 
     const status = await BackgroundTask.getStatusAsync();
     if (status === BackgroundTask.BackgroundTaskStatus.Available) {
-        await BackgroundTask.registerTaskAsync(
-            TASKS.FETCH_ARTICLES,
-            TASK_CONFIGURATION
-        );
-        await BackgroundTask.registerTaskAsync(
-            TASKS.NOTIFY_MATCH_HITS,
-            TASK_CONFIGURATION
-        );
+        await registerTaskIfNeeded(TASKS.PLAN_NOTIFICATIONS);
+        await registerTaskIfNeeded(TASKS.SYNC_CERTIFICATIONS);
     }
 };

@@ -2,9 +2,14 @@ import {useFonts} from "expo-font";
 import {Slot} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {StatusBar} from "expo-status-bar";
-import {Provider} from "jotai";
+import {getDefaultStore, Provider} from "jotai";
 import {useEffect} from "react";
 import {View} from "react-native";
+import {
+    initialWindowMetrics,
+    SafeAreaProvider,
+} from "react-native-safe-area-context";
+import {useEngagementSync} from "@/hooks/useEngagementSync";
 import {styles} from "@/styles";
 import {theme} from "@/theme/colors";
 
@@ -15,6 +20,11 @@ const FONT_SETTINGS = {
     LatoLight: require("../../assets/fonts/Lato-Light.ttf"),
     LatoRegular: require("../../assets/fonts/Lato-Regular.ttf"),
     LatoBold: require("../../assets/fonts/Lato-Bold.ttf"),
+};
+
+const EngagementBridge = () => {
+    useEngagementSync();
+    return null;
 };
 
 const RootLayout = () => {
@@ -32,12 +42,15 @@ const RootLayout = () => {
     }
 
     return (
-        <Provider>
-            <View style={[styles.baseLayer, {backgroundColor: background}]}>
-                <StatusBar style="auto" />
-                <Slot />
-            </View>
-        </Provider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+            <Provider store={getDefaultStore()}>
+                <View style={[styles.baseLayer, {backgroundColor: background}]}>
+                    <StatusBar style="auto" />
+                    <EngagementBridge />
+                    <Slot />
+                </View>
+            </Provider>
+        </SafeAreaProvider>
     );
 };
 

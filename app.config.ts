@@ -1,12 +1,10 @@
-import "dotenv/config";
 import type {ExpoConfig} from "@expo/config-types";
 
 const EAS_OWNER = process.env.EAS_OWNER; // by https://www.binnicordova.com
 const EAS_SLUG = "expo-boilerplate";
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID;
 
-const VERSION = "0.0.6";
-const VERSION_CODE = 6;
+const VERSION = "0.0.7";
 
 const APP_VARIANTS = {
     development: {
@@ -86,7 +84,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         },
     },
     owner: EAS_OWNER,
-    runtimeVersion: `${VERSION}+${VERSION_CODE}`,
+    runtimeVersion: VERSION,
     userInterfaceStyle: "automatic",
     plugins: [
         [
@@ -107,5 +105,9 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         ],
         "expo-updates",
         "expo-background-task",
+        "expo-splash-screen",
+        "expo-status-bar",
+        "expo-font",
+        "@react-native-community/datetimepicker",
     ],
 });
