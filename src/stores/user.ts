@@ -1,12 +1,12 @@
-import crypto from "expo-crypto";
 import {atom} from "jotai";
 import {atomWithStorage} from "jotai/utils";
+import {CERTIFICATION_VALIDITY_MONTHS} from "@/constants/certification";
 import {STORAGE_ID} from "@/constants/storage";
+import {ensureDeviceAtom} from "@/stores/device";
+import {addMonths} from "@/utils/date";
 import {storage} from "@/utils/storage";
 
-const PASSING_THRESHOLD = 0.7;
-const CERTIFICATION_VALIDITY_MONTHS = 3;
-const DEFAULT_USER_NAME = "Quiz Candidate";
+const DEFAULT_USER_NAME = "Certification Candidate";
 
 export type UserProfile = {
     id: string;
@@ -16,49 +16,14 @@ export type UserProfile = {
 export type CertificationRecord = {
     userId: string;
     name: string;
+    attemptId: string;
     score: number;
     total: number;
     percentage: number;
+    expertScore: number;
     passed: boolean;
     issuedAt: string;
-    validUntil: string | null;
-};
-
-const createUserProfile = (): UserProfile => ({
-    id: crypto.randomUUID(),
-    name: DEFAULT_USER_NAME,
-});
-
-const addMonths = (baseIsoDate: string, months: number) => {
-    const targetDate = new Date(baseIsoDate);
-    targetDate.setMonth(targetDate.getMonth() + months);
-    return targetDate.toISOString();
-};
-
-const createCertificationRecord = (payload: {
-    userId: string;
-    name: string;
-    score: number;
-    total: number;
-}): CertificationRecord => {
-    const percentage = Math.round(
-        (payload.score / Math.max(1, payload.total)) * 100
-    );
-    const passed = percentage >= PASSING_THRESHOLD * 100;
-    const issuedAt = new Date().toISOString();
-
-    return {
-        userId: payload.userId,
-        name: payload.name,
-        score: payload.score,
-        total: payload.total,
-        percentage,
-        passed,
-        issuedAt,
-        validUntil: passed
-            ? addMonths(issuedAt, CERTIFICATION_VALIDITY_MONTHS)
-            : null,
-    };
+    validUntil: string;
 };
 
 export const userAtom = atomWithStorage<UserProfile>(
@@ -67,8 +32,6 @@ export const userAtom = atomWithStorage<UserProfile>(
         id: "",
         name: DEFAULT_USER_NAME,
     },
-    // We add the option to bypass the Promise wrapping by not specifying asynchronous behaviors or utilizing storage custom methods if storage resolves as promise, but Jotai's atomWithStorage creates an atom that can return T | Promise<T> if the storage backend is async.
-    // In React Native / Expo, storage is indeed async. Let's make sure our read-sets are safe.
     storage
 );
 
@@ -77,32 +40,68 @@ export const certificationByUserAtom = atomWithStorage<
 >(STORAGE_ID.certifications, {}, storage);
 
 export const ensureUserAtom = atom(null, async (get, set) => {
+    const device = await set(ensureDeviceAtom);
     const user = await get(userAtom);
-    if (!user?.id) {
-        set(userAtom, createUserProfile());
+
+    if (user?.id === device.id) {
+        return user;
     }
+
+    const profile: UserProfile = {
+        id: device.id,
+        name: user?.name || DEFAULT_USER_NAME,
+    };
+
+    set(userAtom, profile);
+    return profile;
 });
 
-export const setCertificationForCurrentUserAtom = atom(
+export const renameUserAtom = atom(null, async (get, set, name: string) => {
+    const user = await get(userAtom);
+    set(userAtom, {...user, name: name.trim() || DEFAULT_USER_NAME});
+});
+
+export const issueCertificationAtom = atom(
     null,
-    async (get, set, payload: {score: number; total: number}) => {
+    async (
+        get,
+        set,
+        payload: {
+            attemptId: string;
+            score: number;
+            total: number;
+            percentage: number;
+            expertScore: number;
+            issuedAt: string;
+        }
+    ) => {
         const user = await get(userAtom);
 
         if (!user?.id) {
-            return;
+            return null;
         }
 
-        const certifications = await get(certificationByUserAtom);
-        const record = createCertificationRecord({
+        const record: CertificationRecord = {
             userId: user.id,
             name: user.name,
+            attemptId: payload.attemptId,
             score: payload.score,
             total: payload.total,
-        });
+            percentage: payload.percentage,
+            expertScore: payload.expertScore,
+            passed: true,
+            issuedAt: payload.issuedAt,
+            validUntil: addMonths(
+                payload.issuedAt,
+                CERTIFICATION_VALIDITY_MONTHS
+            ).toISOString(),
+        };
 
         set(certificationByUserAtom, {
-            ...certifications,
+            ...(await get(certificationByUserAtom)),
             [user.id]: record,
         });
+
+        return record;
     }
 );

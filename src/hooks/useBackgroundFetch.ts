@@ -1,15 +1,18 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
 import {isTV} from "@/constants/platform";
-import {notifyMatchHits, syncCertifications, TASKS} from "@/tasks";
+import {planEngagementNotifications, syncCertifications, TASKS} from "@/tasks";
 
-const TASK_INTERVAL = 15;
+const TASK_INTERVAL = 6 * 60;
 const TASK_CONFIGURATION: BackgroundTask.BackgroundTaskOptions = {
     minimumInterval: TASK_INTERVAL,
 };
 
-if (!TaskManager.isTaskDefined(TASKS.NOTIFY_PENDING_QUIZ)) {
-    TaskManager.defineTask(TASKS.NOTIFY_PENDING_QUIZ, notifyMatchHits);
+if (!TaskManager.isTaskDefined(TASKS.PLAN_NOTIFICATIONS)) {
+    TaskManager.defineTask(
+        TASKS.PLAN_NOTIFICATIONS,
+        planEngagementNotifications
+    );
 }
 
 if (!TaskManager.isTaskDefined(TASKS.SYNC_CERTIFICATIONS)) {
@@ -28,7 +31,7 @@ export const initBackgroundFetch = async () => {
 
     const status = await BackgroundTask.getStatusAsync();
     if (status === BackgroundTask.BackgroundTaskStatus.Available) {
-        await registerTaskIfNeeded(TASKS.NOTIFY_PENDING_QUIZ);
+        await registerTaskIfNeeded(TASKS.PLAN_NOTIFICATIONS);
         await registerTaskIfNeeded(TASKS.SYNC_CERTIFICATIONS);
     }
 };

@@ -1,74 +1,106 @@
 import {useRouter} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
 import {useEffect, useMemo} from "react";
-import {ScrollView, View} from "react-native";
+import {View} from "react-native";
 import {AppBar} from "@/components/AppBar/AppBar";
 import {Button} from "@/components/Button/Button";
+import {CheckpointCard} from "@/components/CheckpointCard/CheckpointCard";
+import {Icon} from "@/components/Icon/Icon";
+import {MicroLearningCard} from "@/components/MicroLearningCard/MicroLearningCard";
+import {NotificationOptIn} from "@/components/NotificationOptIn/NotificationOptIn";
+import {ProgressHeader} from "@/components/ProgressHeader/ProgressHeader";
+import {QuestionCard} from "@/components/QuestionCard/QuestionCard";
+import {ReadinessCard} from "@/components/ReadinessCard/ReadinessCard";
+import {Screen} from "@/components/Screen/Screen";
 import {Text} from "@/components/Text/Text";
-import {contentAtom, fetchContentAtom} from "@/stores/content";
+import {CHECKPOINT_INTERVAL} from "@/constants/certification";
+import {PATHS} from "@/constants/routes";
+import {cooldownAtom, readinessAtom} from "@/stores/certification";
 import {
+    notificationPermissionAtom,
+    requestNotificationsAtom,
+    setNotificationsEnabledAtom,
+} from "@/stores/notifications";
+import {
+    badgesAtom,
+    levelAtom,
+    levelProgressAtom,
+    xpAtom,
+} from "@/stores/progression";
+import {
+    correctIdsAtom,
     fetchQuestionAtom,
     questionAtom,
     questionErrorAtom,
-    selectAlternativeAtom,
-    selectedAlternativeByQuestionAtom,
+    respondAtom,
+    responseByQuestionAtom,
+    revealedQuestionsAtom,
 } from "@/stores/question";
 import {
+    checkpointAtom,
     currentQuestionIndexAtom,
-    finalizeQuizAtom,
+    dismissCheckpointAtom,
     goToNextQuestionAtom,
     initializeQuizAtom,
+    lastFeedbackAtom,
     quizAtom,
     quizErrorAtom,
     quizStatusAtom,
+    sessionAnsweredAtom,
+    submitAnswerAtom,
 } from "@/stores/quiz";
-import {ensureUserAtom, userAtom} from "@/stores/user";
+import {
+    activeStreakAtom,
+    dailyGoalAtom,
+    dueReviewsAtom,
+} from "@/stores/retention";
 import {styles} from "@/styles";
-import {theme} from "@/theme/colors";
+import {isResponseComplete} from "@/utils/grading";
 
 const HomeScreen = () => {
-    const {accent, lightness, background, text, darkness} = theme();
     const question = useAtomValue(questionAtom);
     const questionError = useAtomValue(questionErrorAtom);
-    const content = useAtomValue(contentAtom);
-    const selectedAlternatives = useAtomValue(
-        selectedAlternativeByQuestionAtom
-    );
+    const responses = useAtomValue(responseByQuestionAtom);
+    const revealed = useAtomValue(revealedQuestionsAtom);
+    const correctIds = useAtomValue(correctIdsAtom);
 
     const quizIds = useAtomValue(quizAtom);
     const quizStatus = useAtomValue(quizStatusAtom);
     const quizError = useAtomValue(quizErrorAtom);
     const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
+    const feedback = useAtomValue(lastFeedbackAtom);
+    const checkpoint = useAtomValue(checkpointAtom);
+    const sessionAnswered = useAtomValue(sessionAnsweredAtom);
+
+    const level = useAtomValue(levelAtom);
+    const xp = useAtomValue(xpAtom);
+    const levelProgress = useAtomValue(levelProgressAtom);
+    const badges = useAtomValue(badgesAtom);
+    const streak = useAtomValue(activeStreakAtom);
+    const dueReviews = useAtomValue(dueReviewsAtom);
+    const dailyGoal = useAtomValue(dailyGoalAtom);
+    const readiness = useAtomValue(readinessAtom);
+    const cooldown = useAtomValue(cooldownAtom);
+    const notificationPermission = useAtomValue(notificationPermissionAtom);
 
     const initializeQuiz = useSetAtom(initializeQuizAtom);
     const fetchQuestion = useSetAtom(fetchQuestionAtom);
-    const fetchContent = useSetAtom(fetchContentAtom);
-    const selectAlternative = useSetAtom(selectAlternativeAtom);
+    const respond = useSetAtom(respondAtom);
+    const submitAnswer = useSetAtom(submitAnswerAtom);
     const goToNextQuestion = useSetAtom(goToNextQuestionAtom);
-    const finalizeQuiz = useSetAtom(finalizeQuizAtom);
-    const ensureUser = useSetAtom(ensureUserAtom);
-    const user = useAtomValue(userAtom);
+    const dismissCheckpoint = useSetAtom(dismissCheckpointAtom);
+    const requestNotifications = useSetAtom(requestNotificationsAtom);
+    const setNotificationsEnabled = useSetAtom(setNotificationsEnabledAtom);
     const router = useRouter();
 
-    const totalQuestions = quizIds.length;
     const currentQuestionId = quizIds[currentQuestionIndex];
-    const selectedAlternativeId = question
-        ? selectedAlternatives[question.id]
-        : undefined;
+    const response = question ? responses[question.id] : undefined;
+    const isRevealed = Boolean(question && revealed.includes(question.id));
 
-    const progressLabel = useMemo(() => {
-        if (!totalQuestions) {
-            return "0 / 0";
-        }
-
-        return `${currentQuestionIndex + 1} / ${totalQuestions}`;
-    }, [currentQuestionIndex, totalQuestions]);
-
-    const isLastQuestion = currentQuestionIndex >= totalQuestions - 1;
-
-    useEffect(() => {
-        ensureUser();
-    }, [ensureUser]);
+    const canSubmit = useMemo(
+        () => Boolean(question && isResponseComplete(question, response)),
+        [question, response]
+    );
 
     useEffect(() => {
         if (quizStatus === "idle") {
@@ -77,163 +109,156 @@ const HomeScreen = () => {
     }, [quizStatus, initializeQuiz]);
 
     useEffect(() => {
-        if (!currentQuestionId) return;
         void fetchQuestion(currentQuestionId);
     }, [currentQuestionId, fetchQuestion]);
 
-    useEffect(() => {
-        if (!question?.question_id) return;
-        void fetchContent(question.question_id);
-    }, [fetchContent, question?.question_id]);
-
     if (quizStatus === "loading") {
         return (
-            <View style={styles.centeredState}>
-                <Text type="title">Preparing your quiz...</Text>
-            </View>
+            <Screen centered>
+                <Text type="title">Preparing your session...</Text>
+            </Screen>
         );
     }
 
     if (quizStatus === "error") {
         return (
-            <View style={styles.centeredState}>
-                <Text type="error">{quizError ?? "Could not load quiz."}</Text>
+            <Screen centered>
+                <Text type="error">{quizError ?? "Could not load."}</Text>
                 <Button
                     title="Try again"
                     onPress={() => void initializeQuiz()}
                 />
-            </View>
+            </Screen>
+        );
+    }
+
+    if (checkpoint) {
+        return (
+            <Screen>
+                <AppBar title="Checkpoint" />
+
+                <ProgressHeader
+                    level={level}
+                    xp={xp}
+                    levelProgress={levelProgress}
+                    streak={streak}
+                    dueReviews={dueReviews.length}
+                    dailyGoal={dailyGoal}
+                    badges={badges}
+                />
+
+                <CheckpointCard
+                    checkpoint={checkpoint}
+                    nextMilestone={CHECKPOINT_INTERVAL}
+                    onContinue={() => {
+                        dismissCheckpoint();
+                        void goToNextQuestion();
+                    }}
+                    onStop={() => router.push(PATHS.SKILLS)}
+                />
+
+                {notificationPermission === false && (
+                    <NotificationOptIn
+                        streak={streak}
+                        onEnable={() => void requestNotifications()}
+                        onDismiss={() => void setNotificationsEnabled(false)}
+                    />
+                )}
+
+                <ReadinessCard
+                    readiness={readiness}
+                    cooldown={cooldown}
+                    onStart={() => router.push(PATHS.EXAM)}
+                />
+            </Screen>
         );
     }
 
     if (questionError) {
         return (
-            <View style={styles.centeredState}>
+            <Screen centered>
                 <Text type="error">{questionError}</Text>
                 <Button
                     title="Reload question"
-                    onPress={() =>
-                        currentQuestionId &&
-                        void fetchQuestion(currentQuestionId)
-                    }
+                    onPress={() => void fetchQuestion(currentQuestionId)}
                 />
-            </View>
+            </Screen>
         );
     }
 
     if (!question) {
         return (
-            <View style={styles.centeredState}>
+            <Screen centered>
                 <Text type="subtitle">No question available.</Text>
-            </View>
+            </Screen>
         );
     }
 
     return (
-        <ScrollView
-            style={styles.scroll}
-            contentInsetAdjustmentBehavior="automatic"
-            contentContainerStyle={[
-                styles.quizContainer,
-                {flexGrow: 1, alignItems: "center"},
-            ]}
-        >
-            <View style={styles.quizContent}>
-                <AppBar title="Quiz Challenge" />
-
-                <View style={styles.quizHeader}>
-                    <Text type="label" style={styles.progressText}>
-                        Question {progressLabel}
-                    </Text>
-                    <Text type="caption" style={styles.progressText}>
-                        One page at a time. Choose the best answer.
-                    </Text>
-                </View>
-
-                <View
-                    style={[
-                        styles.quizCard,
-                        {borderColor: accent, backgroundColor: lightness},
-                    ]}
-                >
-                    <Text type="subtitle" style={{color: darkness}}>
-                        {question.question}
-                    </Text>
-
-                    {content?.title && (
-                        <Text
-                            type="label"
-                            style={[styles.contentTitle, {color: accent}]}
-                        >
-                            {content?.title}
-                        </Text>
-                    )}
-
-                    <View style={styles.alternativesList}>
-                        {question.alternatives.map((alternative, index) => {
-                            const isSelected =
-                                selectedAlternativeId === alternative.id;
-
-                            return (
-                                <Button
-                                    key={alternative.id}
-                                    title={`${index + 1}. ${alternative.text}`}
-                                    onPress={() =>
-                                        selectAlternative({
-                                            questionId: question.id,
-                                            alternativeId: alternative.id,
-                                        })
-                                    }
-                                    style={[
-                                        styles.alternativeButton,
-                                        {
-                                            backgroundColor: isSelected
-                                                ? accent
-                                                : background,
-                                            borderColor: accent,
-                                        },
-                                    ]}
-                                    textColor={
-                                        isSelected ? background : darkness
-                                    }
-                                />
-                            );
-                        })}
+        <Screen>
+            <AppBar
+                title="Practice"
+                actions={() => (
+                    <View style={styles.appBarActions}>
+                        <Icon
+                            name="ribbon-outline"
+                            onPress={() => router.push(PATHS.EXAM)}
+                        />
+                        <Icon
+                            name="git-branch-outline"
+                            onPress={() => router.push(PATHS.SKILLS)}
+                        />
+                        <Icon
+                            name="timer-outline"
+                            onPress={() => router.push(PATHS.CHALLENGE)}
+                        />
                     </View>
-                </View>
+                )}
+            />
 
-                <View style={styles.controls}>
-                    <Button
-                        title={isLastQuestion ? "Finish" : "Next"}
-                        onPress={() => {
-                            if (isLastQuestion) {
-                                void finalizeQuiz().then((result) => {
-                                    const id = result?.userId || user.id;
+            <ProgressHeader
+                level={level}
+                xp={xp}
+                levelProgress={levelProgress}
+                streak={streak}
+                dueReviews={dueReviews.length}
+                dailyGoal={dailyGoal}
+                badges={badges}
+            />
 
-                                    if (id) {
-                                        router.push(
-                                            `/${encodeURIComponent(id)}`
-                                        );
-                                    }
-                                });
-                                return;
-                            }
+            <QuestionCard
+                question={question}
+                response={response}
+                correctIds={correctIds}
+                revealed={isRevealed}
+                onRespond={(targetId) => respond({question, targetId})}
+            />
 
-                            goToNextQuestion();
-                        }}
-                        style={styles.controlButton}
-                    />
-                </View>
+            {isRevealed && feedback && (
+                <MicroLearningCard
+                    digest={question.digest}
+                    correct={feedback.correct}
+                    xpAwarded={feedback.xpAwarded}
+                />
+            )}
 
-                <Text
-                    type="caption"
-                    style={[styles.progressText, {color: text}]}
-                >
-                    {Object.keys(selectedAlternatives).length} answered of{" "}
-                    {totalQuestions}
-                </Text>
+            <View style={styles.controls}>
+                <Button
+                    title={isRevealed ? "Next question" : "Check answer"}
+                    disabled={!isRevealed && !canSubmit}
+                    onPress={() =>
+                        isRevealed
+                            ? void goToNextQuestion()
+                            : void submitAnswer(question)
+                    }
+                    style={styles.controlButton}
+                />
             </View>
-        </ScrollView>
+
+            <Text type="caption" style={styles.progressText}>
+                {sessionAnswered} answered this session
+            </Text>
+        </Screen>
     );
 };
 

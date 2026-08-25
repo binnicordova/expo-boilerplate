@@ -1,6 +1,12 @@
 import {CERTIFICATION_SYNC_FUNCTION_URL} from "@/constants/env";
 import type {Question} from "@/models/article";
+import type {AssessmentQuestion} from "@/models/assessment";
 import type {Content} from "@/models/content";
+import {
+    buildSession,
+    getAssessmentQuestion,
+    type SessionRequest,
+} from "@/services/assessment";
 import {http} from "@/services/http";
 import content from "./mocks/content.json";
 import questions from "./mocks/questions.json";
@@ -24,8 +30,11 @@ type PersistCertificationResponse = {
 
 type API = {
     getContent: (id?: string) => Promise<Content | null>;
+    getArticle: (id?: string) => Promise<Content | null>;
     getQuiz: (length?: number) => Promise<string[]>;
     getQuestion: (id?: string) => Promise<Question>;
+    getSession: (request?: SessionRequest) => Promise<string[]>;
+    getAssessment: (id: string) => Promise<AssessmentQuestion>;
     persistCertification: (
         payload: CertificationSyncPayload
     ) => Promise<PersistCertificationResponse>;
@@ -36,6 +45,16 @@ export const api: API = {
         Promise.resolve(
             content.find((c) => c.id === id && c.level < 0) || null
         ),
+    getArticle: (id?: string) =>
+        Promise.resolve(content.find((entry) => entry.id === id) || null),
+    getSession: (request) => Promise.resolve(buildSession(request)),
+    getAssessment: (id) => {
+        const question = getAssessmentQuestion(id);
+
+        return question
+            ? Promise.resolve(question)
+            : Promise.reject(new Error("Question not found"));
+    },
     getQuiz: (length = 5) => {
         // Create a shuffled copy so the mock source array remains stable.
         const ids = [...questions]

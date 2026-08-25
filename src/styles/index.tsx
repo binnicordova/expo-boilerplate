@@ -95,6 +95,11 @@ export const styles = StyleSheet.create({
     progressText: {
         textAlign: "center",
     },
+    appBarActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING[3],
+    },
     centeredState: {
         flex: 1,
         justifyContent: "center",

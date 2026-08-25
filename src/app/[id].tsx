@@ -1,14 +1,14 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
-import {useEffect, useMemo, useState} from "react";
-import {ScrollView, StyleSheet, useWindowDimensions, View} from "react-native";
+import {useEffect, useMemo} from "react";
+import {StyleSheet, useWindowDimensions, View} from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import {Button} from "@/components/Button/Button";
+import {Screen} from "@/components/Screen/Screen";
 import {Text} from "@/components/Text/Text";
-import {resetSelectedAlternativesAtom} from "@/stores/question";
-import {finalizeQuizAtom, initializeQuizAtom} from "@/stores/quiz";
+import {PASS_OVERALL} from "@/constants/certification";
+import {PATHS} from "@/constants/routes";
 import {certificationByUserAtom, ensureUserAtom, userAtom} from "@/stores/user";
-import {styles} from "@/styles";
 import {theme} from "@/theme/colors";
 
 const ResultByIdScreen = () => {
@@ -29,15 +29,9 @@ const ResultByIdScreen = () => {
     const router = useRouter();
     const user = useAtomValue(userAtom);
     const certifications = useAtomValue(certificationByUserAtom);
+    const ensureUser = useSetAtom(ensureUserAtom);
 
     const record = routeId ? certifications[routeId] : undefined;
-
-    const ensureUser = useSetAtom(ensureUserAtom);
-    const finalizeQuiz = useSetAtom(finalizeQuizAtom);
-    const resetSelectedAlternatives = useSetAtom(resetSelectedAlternativesAtom);
-    const initializeQuiz = useSetAtom(initializeQuizAtom);
-
-    const [isComputing, setIsComputing] = useState(false);
 
     const {accent, lightness, darkness, text, background} = theme();
     const {width} = useWindowDimensions();
@@ -48,48 +42,15 @@ const ResultByIdScreen = () => {
 
     const isOwner = Boolean(routeId && routeId === user.id);
 
-    useEffect(() => {
-        let mounted = true;
-
-        if (!isOwner || record) {
-            setIsComputing(false);
-            return;
-        }
-
-        setIsComputing(true);
-
-        void finalizeQuiz().finally(() => {
-            if (mounted) {
-                setIsComputing(false);
-            }
-        });
-
-        return () => {
-            mounted = false;
-        };
-    }, [finalizeQuiz, isOwner, record]);
-
-    const isCertificationValid = Boolean(
+    const isValid = Boolean(
         record?.validUntil && new Date(record.validUntil) > new Date()
     );
 
-    const qrValue = useMemo(() => {
-        // QR should only contain the current URL path (no extra metadata)
-        // Use encoded routeId so the value is safe for URLs
-        const idPath = routeId
-            ? `/${encodeURIComponent(String(routeId))}`
-            : "/";
-        return idPath;
-    }, [routeId]);
-
+    const qrValue = routeId ? `/${encodeURIComponent(String(routeId))}` : "/";
     const qrSize = Math.min(Math.floor(width * 0.55), 220);
 
     return (
-        <ScrollView
-            style={styles.scroll}
-            contentInsetAdjustmentBehavior="automatic"
-            contentContainerStyle={localStyles.scrollContent}
-        >
+        <Screen centered>
             <View style={[localStyles.card, {backgroundColor: lightness}]}>
                 <Text
                     type="title"
@@ -99,19 +60,23 @@ const ResultByIdScreen = () => {
                 </Text>
 
                 <Text type="caption" style={{color: text, textAlign: "center"}}>
-                    User ID: {routeId ?? "Not provided"}
+                    ID: {routeId ?? "Not provided"}
                 </Text>
 
-                {isOwner && isComputing && (
-                    <Text type="caption" style={{color: text}}>
-                        Calculating your score...
-                    </Text>
-                )}
-
-                {!record && !isComputing && (
-                    <Text type="error" style={{textAlign: "center"}}>
-                        No score found for this ID.
-                    </Text>
+                {!record && (
+                    <>
+                        <Text type="error" style={{textAlign: "center"}}>
+                            No certification issued for this ID.
+                        </Text>
+                        <Text
+                            type="caption"
+                            style={{color: text, textAlign: "center"}}
+                        >
+                            The credential is earned by passing the
+                            certification exam at{" "}
+                            {Math.round(PASS_OVERALL * 100)}% or above.
+                        </Text>
+                    </>
                 )}
 
                 {record && (
@@ -120,7 +85,7 @@ const ResultByIdScreen = () => {
                             style={[
                                 localStyles.badge,
                                 {
-                                    backgroundColor: record.passed
+                                    backgroundColor: isValid
                                         ? accent
                                         : background,
                                     borderColor: accent,
@@ -129,35 +94,36 @@ const ResultByIdScreen = () => {
                         >
                             <Text
                                 type="label"
-                                style={{
-                                    color: record.passed ? background : accent,
-                                }}
+                                style={{color: isValid ? background : accent}}
                             >
-                                {record.passed ? "CERTIFIED" : "NOT CERTIFIED"}
+                                {isValid ? "CERTIFIED" : "EXPIRED"}
                             </Text>
                         </View>
 
                         <View style={localStyles.summary}>
                             <Text type="subtitle" style={{color: darkness}}>
-                                Name: {record.name}
+                                {record.name}
                             </Text>
                             <Text type="subtitle" style={{color: darkness}}>
-                                Score: {record.score} / {record.total}
+                                {record.score} / {record.total} ·{" "}
+                                {record.percentage}%
                             </Text>
                             <Text type="caption" style={{color: text}}>
-                                Percentage: {record.percentage}%
+                                Expert section:{" "}
+                                {Math.round(record.expertScore * 100)}%
                             </Text>
                             <Text type="caption" style={{color: text}}>
-                                Issued:{" "}
+                                Issued{" "}
                                 {new Date(record.issuedAt).toLocaleDateString()}
                             </Text>
                             <Text
                                 type="caption"
                                 style={{color: text, textAlign: "center"}}
                             >
-                                {record.validUntil
-                                    ? `Valid until: ${new Date(record.validUntil).toLocaleDateString()} (${isCertificationValid ? "active" : "expired"})`
-                                    : "No certificate issued (minimum passing score is 70%)."}
+                                Valid until{" "}
+                                {new Date(
+                                    record.validUntil
+                                ).toLocaleDateString()}
                             </Text>
                         </View>
 
@@ -170,17 +136,13 @@ const ResultByIdScreen = () => {
                 {isOwner && (
                     <View style={localStyles.actions}>
                         <Button
-                            title="Retake Quiz"
-                            onPress={() => {
-                                resetSelectedAlternatives();
-                                void initializeQuiz();
-                                router.replace("/");
-                            }}
+                            title={record ? "Back to practice" : "Practice now"}
+                            onPress={() => router.replace(PATHS.HOME)}
                         />
                     </View>
                 )}
             </View>
-        </ScrollView>
+        </Screen>
     );
 };
 

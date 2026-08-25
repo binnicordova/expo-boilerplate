@@ -1,94 +1,219 @@
 import {atom} from "jotai";
-import {api} from "@/services/api";
-import {selectedAlternativeByQuestionAtom} from "@/stores/question";
 import {
-    ensureUserAtom,
-    setCertificationForCurrentUserAtom,
-    userAtom,
-} from "@/stores/user";
+    CHECKPOINT_INTERVAL,
+    PRACTICE_BATCH,
+    PRACTICE_PREFETCH_THRESHOLD,
+} from "@/constants/certification";
+import type {AssessmentQuestion, Difficulty, Domain} from "@/models/assessment";
+import type {Badge} from "@/models/progression";
+import {api} from "@/services/api";
+import {learnPracticeHourAtom} from "@/stores/notifications";
+import {recordOutcomeAtom} from "@/stores/progression";
+import {responseByQuestionAtom, revealQuestionAtom} from "@/stores/question";
+import {
+    recordDailyAnswerAtom,
+    reviewQueueAtom,
+    scheduleQuestionReviewAtom,
+} from "@/stores/retention";
+import {ensureUserAtom} from "@/stores/user";
+import {getNextDifficulty} from "@/utils/adaptive";
+import {gradeQuestion} from "@/utils/grading";
+import {getDueCards} from "@/utils/scheduler";
 
 type QuizStatus = "idle" | "loading" | "ready" | "error";
+
+export type AnswerFeedback = {
+    correct: boolean;
+    accuracy: number;
+    xpAwarded: number;
+    leveledUp: boolean;
+    unlockedBadge: Badge | null;
+    goalMet: boolean;
+};
+
+export type SessionCheckpoint = {
+    answered: number;
+    correct: number;
+    accuracy: number;
+    xpEarned: number;
+};
 
 export const quizAtom = atom<string[]>([]);
 export const currentQuestionIndexAtom = atom(0);
 export const quizStatusAtom = atom<QuizStatus>("idle");
 export const quizErrorAtom = atom<string | null>(null);
+export const quizDomainAtom = atom<Domain | undefined>(undefined);
+export const adaptiveDifficultyAtom = atom<Difficulty>(0);
+export const adaptiveHistoryAtom = atom<boolean[]>([]);
+export const lastFeedbackAtom = atom<AnswerFeedback | null>(null);
 
-export const initializeQuizAtom = atom(null, async (_get, set) => {
-    set(quizStatusAtom, "loading");
-    set(quizErrorAtom, null);
+export const sessionAnsweredAtom = atom(0);
+export const sessionCorrectAtom = atom(0);
+export const sessionXpAtom = atom(0);
+export const checkpointAtom = atom<SessionCheckpoint | null>(null);
+const lastCheckpointAtAtom = atom(0);
 
-    try {
-        const quiz = await api.getQuiz();
-        set(quizAtom, quiz);
-        set(currentQuestionIndexAtom, 0);
-        set(quizStatusAtom, "ready");
-    } catch (error) {
-        set(quizStatusAtom, "error");
-        const message =
-            error instanceof Error ? error.message : "Could not load the quiz";
-        set(quizErrorAtom, message);
-    }
+export const sessionAccuracyAtom = atom((get) => {
+    const answered = get(sessionAnsweredAtom);
+    return answered ? get(sessionCorrectAtom) / answered : 0;
 });
 
-export const goToNextQuestionAtom = atom(null, (get, set) => {
-    const ids = get(quizAtom);
-    const currentIndex = get(currentQuestionIndexAtom);
+const loadBatchAtom = atom(
+    null,
+    async (get, _set, options: {length?: number} = {}) => {
+        const domain = get(quizDomainAtom);
+        const existing = get(quizAtom);
 
-    if (currentIndex < ids.length - 1) {
-        set(currentQuestionIndexAtom, currentIndex + 1);
+        const reviewIds = getDueCards(await get(reviewQueueAtom))
+            .filter((card) => !domain || card.domain === domain)
+            .map((card) => card.questionId)
+            .filter((id) => !existing.includes(id));
+
+        return api.getSession({
+            length: options.length ?? PRACTICE_BATCH,
+            domain,
+            difficulty: get(adaptiveDifficultyAtom),
+            reviewIds,
+            excludeIds: existing,
+        });
     }
-});
+);
 
-export const finalizeQuizAtom = atom(null, async (get, set) => {
-    console.log("Finalizing quiz...");
-    await set(ensureUserAtom);
+export const initializeQuizAtom = atom(
+    null,
+    async (_get, set, options: {length?: number; domain?: Domain} = {}) => {
+        set(quizStatusAtom, "loading");
+        set(quizErrorAtom, null);
+        set(lastFeedbackAtom, null);
+        set(checkpointAtom, null);
+        set(lastCheckpointAtAtom, 0);
+        set(sessionAnsweredAtom, 0);
+        set(sessionCorrectAtom, 0);
+        set(sessionXpAtom, 0);
 
-    // Get the user after calling set(ensureUserAtom) to make sure we have the persisted ID
-    const user = await get(userAtom);
-    const ids = get(quizAtom);
-    const selections = get(selectedAlternativeByQuestionAtom);
+        if (options.domain !== undefined) {
+            set(quizDomainAtom, options.domain);
+        }
 
-    console.log("finalizeQuizAtom captured user:", user);
-
-    if (!user?.id || !ids.length) {
-        return {
-            userId: user?.id || "no-user-id",
-            score: 0,
-            total: ids.length,
-        };
-    }
-
-    let correct = 0;
-
-    for (const id of ids) {
         try {
-            const question = await api.getQuestion(id);
-            const selected = selections[question.id];
-            const correctAlternative = question.alternatives.find(
-                (alternative) => alternative.is_correct
-            );
+            await set(ensureUserAtom);
+            await set(learnPracticeHourAtom);
 
-            if (
-                selected &&
-                correctAlternative &&
-                selected === correctAlternative.id
-            ) {
-                correct += 1;
-            }
-        } catch (_error) {
-            // If a question fails to load, it is counted as incorrect.
+            set(quizAtom, []);
+            const batch = await set(loadBatchAtom, {length: options.length});
+
+            set(quizAtom, batch);
+            set(currentQuestionIndexAtom, 0);
+            set(quizStatusAtom, "ready");
+        } catch (error) {
+            set(quizStatusAtom, "error");
+            set(
+                quizErrorAtom,
+                error instanceof Error
+                    ? error.message
+                    : "Could not load the session"
+            );
         }
     }
+);
 
-    await set(setCertificationForCurrentUserAtom, {
-        score: correct,
-        total: ids.length,
-    });
+export const extendQuizAtom = atom(null, async (get, set) => {
+    const batch = await set(loadBatchAtom);
 
-    return {
-        userId: user.id,
-        score: correct,
-        total: ids.length,
-    };
+    if (!batch.length) {
+        return false;
+    }
+
+    set(quizAtom, [...get(quizAtom), ...batch]);
+    return true;
 });
+
+export const goToNextQuestionAtom = atom(null, async (get, set) => {
+    const answered = get(sessionAnsweredAtom);
+
+    if (
+        answered > 0 &&
+        answered % CHECKPOINT_INTERVAL === 0 &&
+        get(lastCheckpointAtAtom) !== answered
+    ) {
+        const correct = get(sessionCorrectAtom);
+
+        set(lastCheckpointAtAtom, answered);
+        set(checkpointAtom, {
+            answered,
+            correct,
+            accuracy: correct / answered,
+            xpEarned: get(sessionXpAtom),
+        });
+
+        return;
+    }
+
+    set(lastFeedbackAtom, null);
+
+    const nextIndex = get(currentQuestionIndexAtom) + 1;
+
+    if (get(quizAtom).length - nextIndex <= PRACTICE_PREFETCH_THRESHOLD) {
+        await set(extendQuizAtom);
+    }
+
+    if (nextIndex < get(quizAtom).length) {
+        set(currentQuestionIndexAtom, nextIndex);
+    }
+});
+
+export const dismissCheckpointAtom = atom(null, (_get, set) => {
+    set(checkpointAtom, null);
+});
+
+export const submitAnswerAtom = atom(
+    null,
+    async (get, set, question: AssessmentQuestion) => {
+        const response = get(responseByQuestionAtom)[question.id];
+        const grade = gradeQuestion(question, response);
+
+        const history = [...get(adaptiveHistoryAtom), grade.correct];
+        set(adaptiveHistoryAtom, history);
+        set(
+            adaptiveDifficultyAtom,
+            getNextDifficulty(get(adaptiveDifficultyAtom), history)
+        );
+
+        const daily = await set(recordDailyAnswerAtom, grade.correct);
+
+        const outcome = await set(recordOutcomeAtom, {
+            domain: question.domain,
+            difficulty: question.difficulty,
+            correct: grade.correct,
+            accuracy: grade.accuracy,
+            streak: daily.streak,
+        });
+
+        await set(scheduleQuestionReviewAtom, {
+            questionId: question.id,
+            domain: question.domain,
+            correct: grade.correct,
+            accuracy: grade.accuracy,
+        });
+
+        set(revealQuestionAtom, question.id);
+
+        const answered = get(sessionAnsweredAtom) + 1;
+        const correct = get(sessionCorrectAtom) + (grade.correct ? 1 : 0);
+        const xpEarned = get(sessionXpAtom) + outcome.xpAwarded;
+
+        set(sessionAnsweredAtom, answered);
+        set(sessionCorrectAtom, correct);
+        set(sessionXpAtom, xpEarned);
+
+        const feedback: AnswerFeedback = {
+            correct: grade.correct,
+            accuracy: grade.accuracy,
+            goalMet: daily.goalMet,
+            ...outcome,
+        };
+
+        set(lastFeedbackAtom, feedback);
+        return feedback;
+    }
+);
