@@ -16,7 +16,9 @@
             "!**/.rnstorybook/storybook.requires.ts",
             "!**/.expo",
             "!**/public",
-            "!functions"
+            "!functions",
+            "!ios",
+            "!android"
         ]
     },
     "formatter": {

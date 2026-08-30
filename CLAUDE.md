@@ -2,6 +2,8 @@
 
 Anonymous, offline-first mobile app where developers practise, build mastery, and earn a
 time-boxed certification. Expo SDK 57 · React Native 0.86 · Expo Router · Jotai · TypeScript.
+The entire UI renders through **Expo UI** (`@expo/ui`) — SwiftUI on iOS, Jetpack Compose on
+Android, React Native on web.
 
 ## The one idea that shapes everything
 
@@ -20,10 +22,124 @@ Layered, one direction only — `app/` → `stores/` → `services/` → `utils/
 - `src/services/` mock/remote data access (`api`, `assessment`, `notifications`).
 - `src/app/` Expo Router screens. Presentation only.
 
-**Rules.** Every screen wraps in `<Screen>` (handles safe-area insets; `SafeAreaProvider` lives
-in `_layout.tsx`). Persisted atoms are async — read derived values through `unwrap`, never
-`await` in a component. Pure logic takes an injected `now: Date` so it is testable. No inline
-comments.
+**Rules.** Every screen wraps in `<Screen>` (owns the single `<Host>` bridge and content
+padding). `<Screen>` takes two props that exist purely to keep the practice loop cheap:
+`footer` pins the primary action outside the scroll view so it is always one thumb-tap away,
+and `resetKey` (the current question id) remounts the scroll view so each question starts at
+the top instead of stranding the reader mid-card. Its wrapper `Column` is always rendered, even
+with no footer — changing the tree shape between the two remounts the scroll view and throws
+away scroll position. The SwiftUI host neither honours React Native padding nor receives real safe-area
+insets, so the **app shell in `_layout.tsx` is a `SafeAreaView`** — that is what keeps scrolled
+content from sliding under the status bar. Do not reintroduce insets inside `Screen`. Persisted atoms are async — read derived
+values through `unwrap`, never `await` in a component. Pure logic takes an injected `now: Date`
+so it is testable. No inline comments.
+
+## Component layers (atomic design)
+
+`src/components/` is ordered by composition level, and a layer may only import from layers
+below it.
+
+- `atoms/` — `Text`, `Button`, `Icon`, `IconButton`, `ProgressBar`, `Pill`, `Surface`.
+- `molecules/` — `Card`, `AppBar`, `AnswerOption`, `CodeBlock`, `ChallengeTimer`.
+- `organisms/` — `QuestionCard`, `ProgressHeader`, `CheckpointCard`, `ReadinessCard`,
+  `MicroLearningCard`, `NotificationOptIn`, `SkillTree`, `NewsListItem`.
+- `templates/` — `Screen`.
+
+**`Surface` is the only place chrome is drawn.** Padding, fill, radius, background, border,
+elevation and opacity go through its `SurfaceSpec`; `theme/surface.{ios,android,ts}` compiles
+that spec into the right native modifiers per platform. Never hand-roll container styling — the
+ordering rules below are why.
+
+Three sizing flags, because each platform expresses them differently:
+
+| flag | iOS | Android | web |
+| --- | --- | --- | --- |
+| `fill` (span the cross axis) | `frame({maxWidth})` | `fillMaxWidth()` | `width: "100%"` |
+| `grow` (take the leftover main axis) | native stacks already expand | `weight(1)` | `flex: 1 1 0` |
+| `fillHeight` (fill the host) | native stacks already expand | `fillMaxSize()` | `flex: 1 1 0` |
+
+A flex child needs a bounded parent on web: the `Screen` wrapper takes `fillHeight` so the
+scroll view's `grow` has something to divide, otherwise it collapses to zero height.
+
+## Expo UI
+
+All presentation comes from the universal `@expo/ui` root import — never `react-native`
+primitives. `Host` bridges into the native toolkit, so exactly one lives per screen, inside
+`<Screen>`; nesting more is wasteful.
+
+- **Layout** is `Column` / `Row` / `Spacer`, not flexbox. Gaps come from `spacing`, cross-axis
+  from `alignment`, and `<Spacer flexible />` pushes siblings apart in place of
+  `justifyContent`. `width: "100%"` is the idiom for a full-bleed child.
+- **`style` is `UniversalStyle`** — only padding, background, border, radius, opacity, width and
+  height. Everything else must go through the platform `modifiers` escape hatch.
+- **`Text` takes a single string child.** Interpolation must be a template literal. Font and
+  colour live in `textStyle`, not `style`.
+- **Numbers only for sizes.** iOS maps `width`/`height` onto a SwiftUI `frame`, so
+  `width: "100%"` is silently dropped and children shrink to their content. Use `Surface`'s
+  `fill` instead — it emits `frame({maxWidth})` on iOS and `fillMaxWidth()` on Compose.
+  `ProgressBar` splits per platform (SwiftUI `ProgressView`, Compose `LinearProgressIndicator`,
+  RN fallback) rather than faking a bar with widths.
+- **Modifier order is the layout.** SwiftUI applies modifiers inside-out, and `transformToModifiers`
+  emits style-derived ones in a fixed order with user `modifiers` appended *last* — so a `frame`
+  passed as an escape hatch lands outside the background and the fill reads as transparent space.
+  When order matters, pass the whole chain through `modifiers` and omit `style`, keeping
+  padding → frame → background → border → clip.
+- **`border()` is a rectangle.** Combined with `clipShape` it loses its corners and renders as
+  four disjoint strokes. Use `strokeBorder({shape, cornerRadius})`, which follows the shape.
+- **A huge `borderRadius` is not a capsule** — it degenerates into side arcs. Use
+  `Surface`'s `radius: "capsule"`.
+- **`disabled` dims content on iOS.** For read-only states that must stay legible (a revealed
+  answer), render a `Surface` rather than a disabled `Button`.
+- **Anything tappable is a `Button`.** `onPress` on a `Text` becomes an `onTapGesture` modifier
+  that `fireEvent.press` cannot reach. Withhold the handler entirely when disabled — passing
+  `undefined` down is what makes the lock real.
+- **Icons** are a fixed registry (`components/Icon/icons.ts`) resolved per platform: SF Symbols
+  on iOS, `@expo/material-symbols` XML vectors on Android, Ionicons on web.
+- **`RNHostView`** embeds a React Native view (the QR code) inside the native tree.
+- `metro.config.js` must keep `unstable_enablePackageExports = true` — `@expo/ui` has no `main`
+  field and resolves purely through its `exports` map.
+- Expo UI is a native module: **the app needs a development build**, and cannot run in Expo Go.
+
+## Design tokens
+
+`theme/typography.ts` holds the type ramp (`title` 28 / `subtitle` 20 / `default` 17 / `label` 15
+/ `caption` 13) and `ICON_SIZE`. The `FONT_SIZE` array is a legacy spacing-style scale with only
+16 and 24 in the usable range — do not size text from it, or the screen flattens out.
+
+**Colour comes from `useTheme()`, never from a literal.** The hook resolves the palette against
+the system appearance, so light and dark stay in step with the device; `theme(scheme)` remains a
+pure getter for the handful of module-scope reads (`useNotification`, stories). Hard-coded hexes
+are what broke dark mode before — the verdict greens were literals and stayed dark-on-dark.
+
+Palette roles, drawn from the app icon's magenta → violet → orange gradient over indigo:
+`background` (page), `surface` (raised cards), `lightness` (subtle fills), `accent` (every
+interactive affordance), `onAccent` (copy on an accent fill), `muted` (secondary copy, inactive
+glyphs), `darkness` (headings), `success`/`successSurface`, `error`/`errorSurface`.
+
+Cards are `surface` over `background` with a hairline `lightness` border and a small elevation;
+options are `lightness` fills with **no** border until they resolve. Borders inside a bordered
+card read as noise — prefer fill contrast.
+
+## Reach and hit targets
+
+Roughly half of sessions are one-handed, so placement follows the thumb arc: the comfortable
+band is the bottom third, the top is a stretch.
+
+- `<Screen>` has three regions — `header` pinned top, scrolling body, `footer` pinned bottom.
+  `bottomAligned` sinks short content toward the footer so the options land in the comfort band
+  instead of floating mid-screen.
+- Frequency decides placement, not importance. Options are tapped ~15 times a session and live
+  low; the nav icons are tapped once or twice and stay in the top bar where iOS expects them.
+- **The surface must be the button's label, never a wrapper around the button.** The native
+  view renders `SwiftUI.Button { Children() }` and applies `modifiers` *outside* it, so padding
+  and background passed to the button paint a box larger than the tap target — with a `.plain`
+  style SwiftUI hit-tests the label alone. Put `surfaceModifiers` on the inner `Row` (the label)
+  and give the button only `surfaceStyle`, which is web-only sizing that neutralises the web
+  fallback's fixed 40px inline-flex box. `SurfaceSpec.interactive` then adds `contentShape` so
+  transparent regions of the label stay tappable. `AnswerOption` has a regression test pinning
+  this: the button must carry no `padding`/`background` modifier, and the node holding
+  `contentShape` must not be the button.
+- Answer rows carry `SPACING[4]` vertical padding, keeping them well past the 44pt minimum.
 
 ## Content
 
@@ -32,6 +148,35 @@ comments.
 - Five formats: multiple-choice, multiple-select, code-analysis, architecture-tradeoff, ordering.
 - Domains: react, react-native, typescript, architecture, node. Difficulty 0/1/2.
 - Legacy questions are adapted lazily; their article becomes the micro-learning digest.
+
+## Practice loop friction budget
+
+The loop is the product, so a question costs **3 taps and no scrolling**: pick, check,
+advance — all from the same thumb position.
+
+- `<Screen footer>` pins the action; `resetKey` returns each new question to the top.
+- Practice shows a **3-option shortlist** (`PRACTICE_MAX_OPTIONS`) via `utils/options.ts`, so
+  the card fits one screen. `narrowAlternatives` always keeps **every** correct alternative —
+  dropping one would make a multiple-select question unanswerable — and always keeps at least
+  one distractor, so the cap is a target rather than a guarantee. Grading is untouched: it
+  still derives correct ids from the full question.
+- **The exam is deliberately uncapped.** Three options put the guess rate at 33% against 17%
+  for six, and the ≥80% pass mark was tuned against full option sets; capping there would
+  weaken the credential. This is the practice/certification split in miniature — pass
+  `maxOptions` only on the practice surfaces.
+- The digest is a **bottom sheet** on reveal, not a card appended below the options, so the
+  explanation and "Next question" arrive without scrolling. Dismissing the sheet leaves the
+  graded question with the footer CTA as the fallback path.
+
+## Motion
+
+`SurfaceSpec.animateOn` springs a surface between visual states whenever the value changes —
+a snappy, lightly damped spring on iOS (`response 0.32 / damping 0.82`), an animated colour and
+content-size spec on Compose, nothing on web. Springs are interruptible, so a fast tapper never
+fights the animation. `AnswerOption` passes its state index; `ProgressBar` passes its progress.
+
+SF Symbol effects (`symbolEffect`) need Expo UI's `useNativeState` worklet plumbing rather than
+a plain value, so they are not wired up.
 
 ## Practice loop (`stores/quiz.ts`)
 
@@ -70,17 +215,34 @@ Valid 6 months.
 
 ## Testing
 
-`npx jest` — 139 tests. Pure utils are exhaustively tested; stores are tested through `createStore()`
+`npx jest` — 151 tests. Pure utils are exhaustively tested; stores are tested through `createStore()`
 with AsyncStorage and `expo-application` mocked. **When product rules change, the tests are the
 spec — update them deliberately, they encode the tuning decisions.**
+
+Jest resolves the **iOS** build of `@expo/ui`, so components render as native host views: text
+arrives in a `text` prop and buttons in a `label` prop, which `getByText` cannot see. Query them
+through `src/test-utils/expoUi.ts` (`getByUIText`, `getByUILabel`, `getByUIProp`) — it matches
+host nodes only, so composite wrappers are not counted twice. `fireEvent.press` works on a
+`Button` (it maps to `onButtonPress`) but not on a `Text`. Beware that `fireEvent` walks up to
+composite parents, so a component that still receives an `onPress` prop looks pressable even when
+its native node is disabled — assert on `onButtonPress`/modifiers when testing the disabled path.
 
 Verify with: `npx tsc --noEmit --skipLibCheck`, `npx biome check src/`, `npx jest`.
 
 ## Known gaps
 
-- `models/article.ts` is missing the `Article` export that `utils/matcher.ts` and `NewsListItem`
-  import — pre-existing, still broken.
 - `@react-native-async-storage/async-storage` is in devDependencies but is a runtime dependency.
+- Expo UI drops `testID` on iOS icons, so icons are asserted through their `systemName`.
+- The web fallback `Button` is `display: inline-flex` with a fixed height, so it ignores a
+  full-width child — the width has to go on the button's own `style`. Its label also needs
+  `<Spacer flexible />` on both sides to centre, since `Row` has no main-axis justification.
+- Expo UI buttons expose no accessible name on web when given children instead of `label`;
+  screen-reader labelling is unaddressed.
+- The web `BottomSheet` renders in a portal **outside** the `Host`, so the CSS variables the
+  web `Button` fallback reads for its fill are out of scope there and the CTA renders
+  unpainted. `Button` sets its own accent background to survive the portal.
+- Storybook renders Expo UI natively on device and through the RN fallback on web; stories must
+  wrap in `<Host matchContents>`.
 - Notification opens are inferred (app opened via tap), not true delivery receipts.
 - Background task cadence is throttled by the OS; reliable win-back needs server-side push.
 - Tuning values in `constants/` are informed guesses, not validated against real cohorts.

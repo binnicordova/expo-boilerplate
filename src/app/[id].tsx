@@ -1,15 +1,23 @@
+import {Column, RNHostView} from "@expo/ui";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
 import {useEffect, useMemo} from "react";
-import {StyleSheet, useWindowDimensions, View} from "react-native";
+import {useWindowDimensions} from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import {Button} from "@/components/Button/Button";
-import {Screen} from "@/components/Screen/Screen";
-import {Text} from "@/components/Text/Text";
+import {Button} from "@/components/atoms/Button/Button";
+import {Text} from "@/components/atoms/Text/Text";
+import {Card} from "@/components/molecules/Card/Card";
+import {Screen} from "@/components/templates/Screen/Screen";
 import {PASS_OVERALL} from "@/constants/certification";
 import {PATHS} from "@/constants/routes";
 import {certificationByUserAtom, ensureUserAtom, userAtom} from "@/stores/user";
-import {theme} from "@/theme/colors";
+import {RADIUS} from "@/theme/border";
+import {SPACING} from "@/theme/spacing";
+import {pill} from "@/theme/ui";
+import {useTheme} from "@/theme/useTheme";
+
+const QR_SURFACE = "#FFFFFF";
+const FULL_WIDTH = {width: "100%"} as const;
 
 const ResultByIdScreen = () => {
     const params = useLocalSearchParams<{id?: string | string[]}>();
@@ -33,7 +41,7 @@ const ResultByIdScreen = () => {
 
     const record = routeId ? certifications[routeId] : undefined;
 
-    const {accent, lightness, darkness, text, background} = theme();
+    const {accent, background, darkness, text} = useTheme();
     const {width} = useWindowDimensions();
 
     useEffect(() => {
@@ -51,137 +59,89 @@ const ResultByIdScreen = () => {
 
     return (
         <Screen centered>
-            <View style={[localStyles.card, {backgroundColor: lightness}]}>
-                <Text
-                    type="title"
-                    style={{color: darkness, textAlign: "center"}}
-                >
+            <Card alignment="center" testID="certificate-card">
+                <Text type="title" color={darkness} align="center">
                     Certification
                 </Text>
 
-                <Text type="caption" style={{color: text, textAlign: "center"}}>
-                    ID: {routeId ?? "Not provided"}
+                <Text type="caption" color={text} align="center">
+                    {`ID: ${routeId ?? "Not provided"}`}
                 </Text>
 
                 {!record && (
-                    <>
-                        <Text type="error" style={{textAlign: "center"}}>
+                    <Column
+                        alignment="center"
+                        spacing={SPACING[2]}
+                        style={FULL_WIDTH}
+                    >
+                        <Text type="error" align="center">
                             No certification issued for this ID.
                         </Text>
-                        <Text
-                            type="caption"
-                            style={{color: text, textAlign: "center"}}
-                        >
-                            The credential is earned by passing the
-                            certification exam at{" "}
-                            {Math.round(PASS_OVERALL * 100)}% or above.
+                        <Text type="caption" color={text} align="center">
+                            {`The credential is earned by passing the certification exam at ${Math.round(PASS_OVERALL * 100)}% or above.`}
                         </Text>
-                    </>
+                    </Column>
                 )}
 
                 {record && (
-                    <>
-                        <View
-                            style={[
-                                localStyles.badge,
-                                {
-                                    backgroundColor: isValid
-                                        ? accent
-                                        : background,
-                                    borderColor: accent,
-                                },
-                            ]}
+                    <Column
+                        alignment="center"
+                        spacing={SPACING[3]}
+                        style={FULL_WIDTH}
+                    >
+                        <Column
+                            alignment="center"
+                            style={pill(accent, isValid ? accent : background)}
                         >
                             <Text
                                 type="label"
-                                style={{color: isValid ? background : accent}}
+                                color={isValid ? background : accent}
                             >
                                 {isValid ? "CERTIFIED" : "EXPIRED"}
                             </Text>
-                        </View>
+                        </Column>
 
-                        <View style={localStyles.summary}>
-                            <Text type="subtitle" style={{color: darkness}}>
-                                {record.name}
-                            </Text>
-                            <Text type="subtitle" style={{color: darkness}}>
-                                {record.score} / {record.total} ·{" "}
-                                {record.percentage}%
-                            </Text>
-                            <Text type="caption" style={{color: text}}>
-                                Expert section:{" "}
-                                {Math.round(record.expertScore * 100)}%
-                            </Text>
-                            <Text type="caption" style={{color: text}}>
-                                Issued{" "}
-                                {new Date(record.issuedAt).toLocaleDateString()}
-                            </Text>
-                            <Text
-                                type="caption"
-                                style={{color: text, textAlign: "center"}}
-                            >
-                                Valid until{" "}
-                                {new Date(
-                                    record.validUntil
-                                ).toLocaleDateString()}
-                            </Text>
-                        </View>
+                        <Text type="subtitle" color={darkness} align="center">
+                            {record.name}
+                        </Text>
+                        <Text type="subtitle" color={darkness} align="center">
+                            {`${record.score} / ${record.total} · ${record.percentage}%`}
+                        </Text>
+                        <Text type="caption" color={text} align="center">
+                            {`Expert section: ${Math.round(record.expertScore * 100)}%`}
+                        </Text>
+                        <Text type="caption" color={text} align="center">
+                            {`Issued ${new Date(record.issuedAt).toLocaleDateString()}`}
+                        </Text>
+                        <Text type="caption" color={text} align="center">
+                            {`Valid until ${new Date(record.validUntil).toLocaleDateString()}`}
+                        </Text>
 
-                        <View style={localStyles.qrContainer}>
-                            <QRCode value={qrValue} size={qrSize} />
-                        </View>
-                    </>
+                        <Column
+                            alignment="center"
+                            style={{
+                                backgroundColor: QR_SURFACE,
+                                borderRadius: RADIUS[5],
+                                padding: SPACING[3],
+                            }}
+                        >
+                            <RNHostView matchContents>
+                                <QRCode value={qrValue} size={qrSize} />
+                            </RNHostView>
+                        </Column>
+                    </Column>
                 )}
 
                 {isOwner && (
-                    <View style={localStyles.actions}>
-                        <Button
-                            title={record ? "Back to practice" : "Practice now"}
-                            onPress={() => router.replace(PATHS.HOME)}
-                        />
-                    </View>
+                    <Button
+                        testID="certificate-action"
+                        title={record ? "Back to practice" : "Practice now"}
+                        onPress={() => router.replace(PATHS.HOME)}
+                    />
                 )}
-            </View>
+            </Card>
         </Screen>
     );
 };
-
-const localStyles = StyleSheet.create({
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 16,
-    },
-    card: {
-        width: "100%",
-        maxWidth: 760,
-        borderRadius: 16,
-        padding: 24,
-        alignItems: "center",
-        gap: 14,
-    },
-    badge: {
-        borderWidth: 1,
-        borderRadius: 999,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-    },
-    summary: {
-        width: "100%",
-        alignItems: "center",
-        gap: 4,
-    },
-    qrContainer: {
-        marginTop: 8,
-        padding: 10,
-        borderRadius: 12,
-        backgroundColor: "#fff",
-    },
-    actions: {
-        width: "100%",
-        marginTop: 8,
-    },
-});
 
 export default ResultByIdScreen;

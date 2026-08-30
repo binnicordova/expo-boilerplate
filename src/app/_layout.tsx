@@ -4,14 +4,14 @@ import * as SplashScreen from "expo-splash-screen";
 import {StatusBar} from "expo-status-bar";
 import {getDefaultStore, Provider} from "jotai";
 import {useEffect} from "react";
-import {View} from "react-native";
+import {StyleSheet} from "react-native";
 import {
     initialWindowMetrics,
     SafeAreaProvider,
+    SafeAreaView,
 } from "react-native-safe-area-context";
 import {useEngagementSync} from "@/hooks/useEngagementSync";
-import {styles} from "@/styles";
-import {theme} from "@/theme/colors";
+import {useTheme} from "@/theme/useTheme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,13 +22,19 @@ const FONT_SETTINGS = {
     LatoBold: require("../../assets/fonts/Lato-Bold.ttf"),
 };
 
+const styles = StyleSheet.create({
+    baseLayer: {
+        flex: 1,
+    },
+});
+
 const EngagementBridge = () => {
     useEngagementSync();
     return null;
 };
 
 const RootLayout = () => {
-    const {background} = theme();
+    const {background} = useTheme();
     const [fontsLoaded, fontError] = useFonts(FONT_SETTINGS);
 
     useEffect(() => {
@@ -44,11 +50,13 @@ const RootLayout = () => {
     return (
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <Provider store={getDefaultStore()}>
-                <View style={[styles.baseLayer, {backgroundColor: background}]}>
+                <SafeAreaView
+                    style={[styles.baseLayer, {backgroundColor: background}]}
+                >
                     <StatusBar style="auto" />
                     <EngagementBridge />
                     <Slot />
-                </View>
+                </SafeAreaView>
             </Provider>
         </SafeAreaProvider>
     );

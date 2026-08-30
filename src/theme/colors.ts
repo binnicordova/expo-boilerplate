@@ -2,35 +2,58 @@ type ThemeType = "light" | "dark";
 
 type ColorScheme = {
     background: string;
+    surface: string;
     text: string;
+    muted: string;
     accent: string;
+    onAccent: string;
     error: string;
+    errorSurface: string;
+    success: string;
+    successSurface: string;
     lightness: string;
     darkness: string;
 };
 
+/**
+ * Derived from the app icon: a deep indigo ground under a magenta → violet →
+ * orange gradient. Violet carries every interactive affordance; magenta-leaning
+ * red and a teal-green sit either side of it without muddying the brand hue.
+ */
 const Colors: Record<ThemeType, ColorScheme> = {
-    // Light theme: cool, professional, trustworthy blues and deep navy text
     light: {
-        background: "#F7FBFF", // very light cool background for clarity
-        text: "#062743", // deep navy for high readability and credibility
-        accent: "#2563EB", // trustworthy, modern blue accent (interactive)
-        error: "#C62828", // clear, accessible error red
-        lightness: "#EAF4FF", // subtle blue tint for cards and surfaces
-        darkness: "#062743", // consistent heading / strong text color
+        background: "#F7F6FC", // lavender-tinted page ground
+        surface: "#FFFFFF", // raised cards
+        text: "#2A2A45", // body copy
+        muted: "#6E6E8F", // secondary copy and inactive glyphs
+        accent: "#7C3AED", // the icon's core violet — every tappable thing
+        onAccent: "#FFFFFF", // copy sitting on an accent fill
+        error: "#E11D48",
+        errorSurface: "#FDECF1",
+        success: "#12805C",
+        successSurface: "#E4F5EF",
+        lightness: "#EFEBFD", // subtle violet fill for options and pills
+        darkness: "#171730", // headings, matching the icon's ground
     },
 
-    // Dark theme: deep slate background with vivid indigo accent for a modern AI feel
     dark: {
-        background: "#071226", // near-black navy for legibility and depth
-        text: "#E6F5FF", // soft, slightly cool off-white for reduced glare
-        accent: "#7C3AED", // vivid indigo-purple for a contemporary, AI-forward accent
-        error: "#FF6B6B", // high-visibility error color on dark surfaces
-        lightness: "#0B1220", // card surface, slightly lifted from background
-        darkness: "#BFE9FF", // pale sky-blue for strong headings on dark cards
+        background: "#12122A", // the icon's own indigo ground
+        surface: "#1C1C38", // raised cards, lifted off the ground
+        text: "#E6E4F5",
+        muted: "#9C9CC0",
+        accent: "#A78BFA", // violet lightened to stay legible on indigo
+        onAccent: "#12122A", // the ground colour reads darkest on light violet
+        error: "#FF6B8A",
+        errorSurface: "#3A1A28",
+        success: "#3DD9A0",
+        successSurface: "#12332B",
+        lightness: "#262649",
+        darkness: "#FFFFFF",
     },
 };
 
 export const theme = (theme?: ThemeType): ColorScheme => {
     return Colors[theme || "light"];
 };
+
+export type {ColorScheme, ThemeType};

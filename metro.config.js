@@ -5,7 +5,7 @@ const defaultConfig = getDefaultConfig(__dirname);
 
 const withStorybook = require("@storybook/react-native/metro/withStorybook");
 
-defaultConfig.resolver.unstable_enablePackageExports = false;
+defaultConfig.resolver.unstable_enablePackageExports = true;
 
 module.exports = withStorybook(defaultConfig, {
     enabled: process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === "true",
