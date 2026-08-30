@@ -1,18 +1,20 @@
+import {BottomSheet, Row} from "@expo/ui";
 import {useRouter} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
-import {useEffect, useMemo} from "react";
-import {View} from "react-native";
-import {AppBar} from "@/components/AppBar/AppBar";
-import {Button} from "@/components/Button/Button";
-import {CheckpointCard} from "@/components/CheckpointCard/CheckpointCard";
-import {Icon} from "@/components/Icon/Icon";
-import {MicroLearningCard} from "@/components/MicroLearningCard/MicroLearningCard";
-import {NotificationOptIn} from "@/components/NotificationOptIn/NotificationOptIn";
-import {ProgressHeader} from "@/components/ProgressHeader/ProgressHeader";
-import {QuestionCard} from "@/components/QuestionCard/QuestionCard";
-import {ReadinessCard} from "@/components/ReadinessCard/ReadinessCard";
-import {Screen} from "@/components/Screen/Screen";
-import {Text} from "@/components/Text/Text";
+import {useEffect, useMemo, useState} from "react";
+import {Button} from "@/components/atoms/Button/Button";
+import {IconButton} from "@/components/atoms/IconButton/IconButton";
+import {Surface} from "@/components/atoms/Surface/Surface";
+import {Text} from "@/components/atoms/Text/Text";
+import {AppBar} from "@/components/molecules/AppBar/AppBar";
+import {CheckpointCard} from "@/components/organisms/CheckpointCard/CheckpointCard";
+import {MicroLearningCard} from "@/components/organisms/MicroLearningCard/MicroLearningCard";
+import {NotificationOptIn} from "@/components/organisms/NotificationOptIn/NotificationOptIn";
+import {ProgressHeader} from "@/components/organisms/ProgressHeader/ProgressHeader";
+import {QuestionCard} from "@/components/organisms/QuestionCard/QuestionCard";
+import {ReadinessCard} from "@/components/organisms/ReadinessCard/ReadinessCard";
+import {Screen} from "@/components/templates/Screen/Screen";
+import {PRACTICE_MAX_OPTIONS} from "@/constants/assessment";
 import {CHECKPOINT_INTERVAL} from "@/constants/certification";
 import {PATHS} from "@/constants/routes";
 import {cooldownAtom, readinessAtom} from "@/stores/certification";
@@ -46,7 +48,6 @@ import {
     quizAtom,
     quizErrorAtom,
     quizStatusAtom,
-    sessionAnsweredAtom,
     submitAnswerAtom,
 } from "@/stores/quiz";
 import {
@@ -54,7 +55,8 @@ import {
     dailyGoalAtom,
     dueReviewsAtom,
 } from "@/stores/retention";
-import {styles} from "@/styles";
+import {SPACING} from "@/theme/spacing";
+import {useTheme} from "@/theme/useTheme";
 import {isResponseComplete} from "@/utils/grading";
 
 const HomeScreen = () => {
@@ -70,7 +72,6 @@ const HomeScreen = () => {
     const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
     const feedback = useAtomValue(lastFeedbackAtom);
     const checkpoint = useAtomValue(checkpointAtom);
-    const sessionAnswered = useAtomValue(sessionAnsweredAtom);
 
     const level = useAtomValue(levelAtom);
     const xp = useAtomValue(xpAtom);
@@ -92,6 +93,11 @@ const HomeScreen = () => {
     const requestNotifications = useSetAtom(requestNotificationsAtom);
     const setNotificationsEnabled = useSetAtom(setNotificationsEnabledAtom);
     const router = useRouter();
+    const {surface} = useTheme();
+
+    const [dismissedDigestFor, setDismissedDigestFor] = useState<string | null>(
+        null
+    );
 
     const currentQuestionId = quizIds[currentQuestionIndex];
     const response = question ? responses[question.id] : undefined;
@@ -115,7 +121,9 @@ const HomeScreen = () => {
     if (quizStatus === "loading") {
         return (
             <Screen centered>
-                <Text type="title">Preparing your session...</Text>
+                <Text type="title" align="center">
+                    Preparing your session...
+                </Text>
             </Screen>
         );
     }
@@ -123,8 +131,11 @@ const HomeScreen = () => {
     if (quizStatus === "error") {
         return (
             <Screen centered>
-                <Text type="error">{quizError ?? "Could not load."}</Text>
+                <Text type="error" align="center">
+                    {quizError ?? "Could not load."}
+                </Text>
                 <Button
+                    testID="retry-quiz"
                     title="Try again"
                     onPress={() => void initializeQuiz()}
                 />
@@ -177,8 +188,11 @@ const HomeScreen = () => {
     if (questionError) {
         return (
             <Screen centered>
-                <Text type="error">{questionError}</Text>
+                <Text type="error" align="center">
+                    {questionError}
+                </Text>
                 <Button
+                    testID="reload-question"
                     title="Reload question"
                     onPress={() => void fetchQuestion(currentQuestionId)}
                 />
@@ -189,61 +203,53 @@ const HomeScreen = () => {
     if (!question) {
         return (
             <Screen centered>
-                <Text type="subtitle">No question available.</Text>
+                <Text type="subtitle" align="center">
+                    No question available.
+                </Text>
             </Screen>
         );
     }
 
     return (
-        <Screen>
-            <AppBar
-                title="Practice"
-                actions={() => (
-                    <View style={styles.appBarActions}>
-                        <Icon
-                            name="ribbon-outline"
-                            onPress={() => router.push(PATHS.EXAM)}
-                        />
-                        <Icon
-                            name="git-branch-outline"
-                            onPress={() => router.push(PATHS.SKILLS)}
-                        />
-                        <Icon
-                            name="timer-outline"
-                            onPress={() => router.push(PATHS.CHALLENGE)}
-                        />
-                    </View>
-                )}
-            />
+        <Screen
+            bottomAligned
+            resetKey={question.id}
+            header={
+                <>
+                    <AppBar
+                        title="Practice"
+                        actions={() => (
+                            <Row alignment="center" spacing={SPACING[2]}>
+                                <IconButton
+                                    name="certificate"
+                                    onPress={() => router.push(PATHS.EXAM)}
+                                />
+                                <IconButton
+                                    name="skills"
+                                    onPress={() => router.push(PATHS.SKILLS)}
+                                />
+                                <IconButton
+                                    name="timer"
+                                    onPress={() => router.push(PATHS.CHALLENGE)}
+                                />
+                            </Row>
+                        )}
+                    />
 
-            <ProgressHeader
-                level={level}
-                xp={xp}
-                levelProgress={levelProgress}
-                streak={streak}
-                dueReviews={dueReviews.length}
-                dailyGoal={dailyGoal}
-                badges={badges}
-            />
-
-            <QuestionCard
-                question={question}
-                response={response}
-                correctIds={correctIds}
-                revealed={isRevealed}
-                onRespond={(targetId) => respond({question, targetId})}
-            />
-
-            {isRevealed && feedback && (
-                <MicroLearningCard
-                    digest={question.digest}
-                    correct={feedback.correct}
-                    xpAwarded={feedback.xpAwarded}
-                />
-            )}
-
-            <View style={styles.controls}>
+                    <ProgressHeader
+                        level={level}
+                        xp={xp}
+                        levelProgress={levelProgress}
+                        streak={streak}
+                        dueReviews={dueReviews.length}
+                        dailyGoal={dailyGoal}
+                        badges={badges}
+                    />
+                </>
+            }
+            footer={
                 <Button
+                    testID="primary-action"
                     title={isRevealed ? "Next question" : "Check answer"}
                     disabled={!isRevealed && !canSubmit}
                     onPress={() =>
@@ -251,13 +257,52 @@ const HomeScreen = () => {
                             ? void goToNextQuestion()
                             : void submitAnswer(question)
                     }
-                    style={styles.controlButton}
                 />
-            </View>
+            }
+        >
+            <QuestionCard
+                question={question}
+                response={response}
+                correctIds={correctIds}
+                revealed={isRevealed}
+                maxOptions={PRACTICE_MAX_OPTIONS}
+                onRespond={(targetId) => respond({question, targetId})}
+            />
 
-            <Text type="caption" style={styles.progressText}>
-                {sessionAnswered} answered this session
-            </Text>
+            {feedback && (
+                <BottomSheet
+                    testID="digest-sheet"
+                    isPresented={
+                        isRevealed && dismissedDigestFor !== question.id
+                    }
+                    onDismiss={() => setDismissedDigestFor(question.id)}
+                    showDragIndicator
+                    contentPadding={0}
+                >
+                    <Surface
+                        fill
+                        spacing={SPACING[4]}
+                        padding={SPACING[4]}
+                        backgroundColor={surface}
+                    >
+                        <MicroLearningCard
+                            variant="plain"
+                            digest={question.digest}
+                            correct={feedback.correct}
+                            xpAwarded={feedback.xpAwarded}
+                        />
+
+                        <Button
+                            testID="digest-next"
+                            title="Next question"
+                            onPress={() => {
+                                setDismissedDigestFor(question.id);
+                                void goToNextQuestion();
+                            }}
+                        />
+                    </Surface>
+                </BottomSheet>
+            )}
         </Screen>
     );
 };

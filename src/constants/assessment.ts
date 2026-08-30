@@ -130,3 +130,10 @@ export const SKILL_TREE: SkillNode[] = [
         masteryRequired: 0.75,
     },
 ];
+
+/**
+ * Practice shows a shortlist so a question never needs scrolling. The exam is
+ * deliberately left uncapped — fewer options means a higher guess rate, which
+ * would weaken the credential.
+ */
+export const PRACTICE_MAX_OPTIONS = 3;

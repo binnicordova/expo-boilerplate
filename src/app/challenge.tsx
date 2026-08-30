@@ -1,12 +1,13 @@
 import {useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useState} from "react";
-import {View} from "react-native";
-import {AppBar} from "@/components/AppBar/AppBar";
-import {Button} from "@/components/Button/Button";
-import {ChallengeTimer} from "@/components/ChallengeTimer/ChallengeTimer";
-import {QuestionCard} from "@/components/QuestionCard/QuestionCard";
-import {Screen} from "@/components/Screen/Screen";
-import {Text} from "@/components/Text/Text";
+import {Button} from "@/components/atoms/Button/Button";
+import {Text} from "@/components/atoms/Text/Text";
+import {AppBar} from "@/components/molecules/AppBar/AppBar";
+import {Card} from "@/components/molecules/Card/Card";
+import {ChallengeTimer} from "@/components/molecules/ChallengeTimer/ChallengeTimer";
+import {QuestionCard} from "@/components/organisms/QuestionCard/QuestionCard";
+import {Screen} from "@/components/templates/Screen/Screen";
+import {PRACTICE_MAX_OPTIONS} from "@/constants/assessment";
 import {useCountdown} from "@/hooks/useCountdown";
 import type {AssessmentQuestion} from "@/models/assessment";
 import {api} from "@/services/api";
@@ -24,7 +25,6 @@ import {
     startChallengeAtom,
 } from "@/stores/challenge";
 import {respondAtom, responseByQuestionAtom} from "@/stores/question";
-import {styles} from "@/styles";
 import {gradeQuestion, isResponseComplete} from "@/utils/grading";
 
 const ChallengeScreen = () => {
@@ -85,24 +85,26 @@ const ChallengeScreen = () => {
             <Screen>
                 <AppBar title="Proof of Skill" />
 
-                <Text type="caption" style={styles.progressText}>
+                <Text type="caption" align="center">
                     Limited-time sprints. Answer fast and keep your accuracy
                     above the pass mark.
                 </Text>
 
                 {challenges.map((challenge) => (
-                    <View key={challenge.id} style={styles.quizHeader}>
+                    <Card
+                        key={challenge.id}
+                        testID={`challenge-${challenge.id}`}
+                    >
                         <Text type="subtitle">{challenge.label}</Text>
                         <Text type="caption">
-                            {challenge.questionCount} questions ·{" "}
-                            {challenge.durationSeconds}s · pass at{" "}
-                            {challenge.passingStreak}
+                            {`${challenge.questionCount} questions · ${challenge.durationSeconds}s · pass at ${challenge.passingStreak}`}
                         </Text>
                         <Button
+                            testID={`start-${challenge.id}`}
                             title="Start"
                             onPress={() => void startChallenge(challenge.id)}
                         />
-                    </View>
+                    </Card>
                 ))}
             </Screen>
         );
@@ -111,13 +113,17 @@ const ChallengeScreen = () => {
     if (status === "passed" || status === "failed") {
         return (
             <Screen centered>
-                <Text type="title">
+                <Text type="title" align="center">
                     {status === "passed" ? "Challenge passed" : "Time is up"}
                 </Text>
-                <Text type="subtitle">
-                    {correct} correct of {questionIds.length}
+                <Text type="subtitle" align="center">
+                    {`${correct} correct of ${questionIds.length}`}
                 </Text>
-                <Button title="Back to challenges" onPress={resetChallenge} />
+                <Button
+                    testID="reset-challenge"
+                    title="Back to challenges"
+                    onPress={resetChallenge}
+                />
             </Screen>
         );
     }
@@ -125,7 +131,9 @@ const ChallengeScreen = () => {
     if (!question) {
         return (
             <Screen centered>
-                <Text type="subtitle">Loading challenge...</Text>
+                <Text type="subtitle" align="center">
+                    Loading challenge...
+                </Text>
             </Screen>
         );
     }
@@ -134,7 +142,21 @@ const ChallengeScreen = () => {
     const canSubmit = isResponseComplete(question, response);
 
     return (
-        <Screen>
+        <Screen
+            resetKey={question.id}
+            footer={
+                <Button
+                    testID="challenge-submit"
+                    title="Submit"
+                    disabled={!canSubmit}
+                    onPress={() =>
+                        advanceChallenge({
+                            correct: gradeQuestion(question, response).correct,
+                        })
+                    }
+                />
+            }
+        >
             <AppBar title={definition.label} />
 
             <ChallengeTimer
@@ -148,21 +170,9 @@ const ChallengeScreen = () => {
             <QuestionCard
                 question={question}
                 response={response}
+                maxOptions={PRACTICE_MAX_OPTIONS}
                 onRespond={(targetId) => respond({question, targetId})}
             />
-
-            <View style={styles.controls}>
-                <Button
-                    title="Submit"
-                    disabled={!canSubmit}
-                    style={styles.controlButton}
-                    onPress={() =>
-                        advanceChallenge({
-                            correct: gradeQuestion(question, response).correct,
-                        })
-                    }
-                />
-            </View>
         </Screen>
     );
 };

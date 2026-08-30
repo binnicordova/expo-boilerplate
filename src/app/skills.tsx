@@ -1,9 +1,9 @@
 import {useAtomValue} from "jotai";
-import {AppBar} from "@/components/AppBar/AppBar";
-import {ProgressHeader} from "@/components/ProgressHeader/ProgressHeader";
-import {Screen} from "@/components/Screen/Screen";
-import {SkillTree} from "@/components/SkillTree/SkillTree";
-import {Text} from "@/components/Text/Text";
+import {Text} from "@/components/atoms/Text/Text";
+import {AppBar} from "@/components/molecules/AppBar/AppBar";
+import {ProgressHeader} from "@/components/organisms/ProgressHeader/ProgressHeader";
+import {SkillTree} from "@/components/organisms/SkillTree/SkillTree";
+import {Screen} from "@/components/templates/Screen/Screen";
 import {
     badgesAtom,
     levelAtom,
@@ -12,7 +12,6 @@ import {
     xpAtom,
 } from "@/stores/progression";
 import {activeStreakAtom, dueReviewsAtom} from "@/stores/retention";
-import {styles} from "@/styles";
 
 const SkillsScreen = () => {
     const nodes = useAtomValue(skillTreeAtom);
@@ -36,7 +35,7 @@ const SkillsScreen = () => {
                 badges={badges}
             />
 
-            <Text type="caption" style={styles.progressText}>
+            <Text type="caption" align="center">
                 Nodes unlock as the domains they depend on reach their mastery
                 threshold.
             </Text>

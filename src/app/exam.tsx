@@ -1,14 +1,14 @@
+import {Column, Row, Spacer} from "@expo/ui";
 import {useRouter} from "expo-router";
 import {useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useState} from "react";
-import {View} from "react-native";
-import {AppBar} from "@/components/AppBar/AppBar";
-import {Button} from "@/components/Button/Button";
-import {ChallengeTimer} from "@/components/ChallengeTimer/ChallengeTimer";
-import {QuestionCard} from "@/components/QuestionCard/QuestionCard";
-import {ReadinessCard} from "@/components/ReadinessCard/ReadinessCard";
-import {Screen} from "@/components/Screen/Screen";
-import {Text} from "@/components/Text/Text";
+import {Button} from "@/components/atoms/Button/Button";
+import {Text} from "@/components/atoms/Text/Text";
+import {AppBar} from "@/components/molecules/AppBar/AppBar";
+import {ChallengeTimer} from "@/components/molecules/ChallengeTimer/ChallengeTimer";
+import {QuestionCard} from "@/components/organisms/QuestionCard/QuestionCard";
+import {ReadinessCard} from "@/components/organisms/ReadinessCard/ReadinessCard";
+import {Screen} from "@/components/templates/Screen/Screen";
 import {DOMAIN_LABEL} from "@/constants/assessment";
 import {
     EXAM_DURATION_SECONDS,
@@ -34,12 +34,14 @@ import {
     submitExamAtom,
 } from "@/stores/certification";
 import {respondAtom, responseByQuestionAtom} from "@/stores/question";
-import {styles} from "@/styles";
-import {theme} from "@/theme/colors";
+import {SPACING} from "@/theme/spacing";
+import {useTheme} from "@/theme/useTheme";
 import {isResponseComplete} from "@/utils/grading";
 
+const FULL_WIDTH = {width: "100%"} as const;
+
 const ExamScreen = () => {
-    const {accent, darkness, error, text} = theme();
+    const {accent, darkness, error, text} = useTheme();
     const router = useRouter();
 
     const status = useAtomValue(examStatusAtom);
@@ -98,10 +100,7 @@ const ExamScreen = () => {
                 <AppBar title="Certification" />
 
                 <Text type="caption">
-                    {EXAM_LENGTH} questions ·{" "}
-                    {Math.round(EXAM_DURATION_SECONDS / 60)} minutes ·{" "}
-                    {Math.round(PASS_OVERALL * 100)}% to pass. Explanations stay
-                    hidden until you submit.
+                    {`${EXAM_LENGTH} questions · ${Math.round(EXAM_DURATION_SECONDS / 60)} minutes · ${Math.round(PASS_OVERALL * 100)}% to pass. Explanations stay hidden until you submit.`}
                 </Text>
 
                 <ReadinessCard
@@ -120,43 +119,49 @@ const ExamScreen = () => {
 
                 <Text
                     type="title"
-                    style={{
-                        color: attempt.passed ? accent : error,
-                        textAlign: "center",
-                    }}
+                    color={attempt.passed ? accent : error}
+                    align="center"
                 >
                     {attempt.passed ? "Certified" : "Not this time"}
                 </Text>
 
-                <Text type="subtitle" style={styles.progressText}>
-                    {attempt.score} / {attempt.total} · {attempt.percentage}%
+                <Text type="subtitle" align="center">
+                    {`${attempt.score} / ${attempt.total} · ${attempt.percentage}%`}
                 </Text>
 
                 {attempt.timedOut && (
-                    <Text type="caption" style={styles.progressText}>
+                    <Text type="caption" align="center">
                         The time limit was reached before you submitted.
                     </Text>
                 )}
 
-                {attempt.byDomain.map((entry) => (
-                    <View key={entry.domain} style={styles.controls}>
-                        <Text type="label" style={{color: darkness}}>
-                            {DOMAIN_LABEL[entry.domain]}
-                        </Text>
-                        <Text type="label" style={{color: text}}>
-                            {entry.correct}/{entry.answered}
-                        </Text>
-                    </View>
-                ))}
+                <Column spacing={SPACING[2]} style={FULL_WIDTH}>
+                    {attempt.byDomain.map((entry) => (
+                        <Row
+                            key={entry.domain}
+                            alignment="center"
+                            style={FULL_WIDTH}
+                        >
+                            <Text type="label" color={darkness}>
+                                {DOMAIN_LABEL[entry.domain]}
+                            </Text>
+                            <Spacer flexible />
+                            <Text type="label" color={text}>
+                                {`${entry.correct}/${entry.answered}`}
+                            </Text>
+                        </Row>
+                    ))}
+                </Column>
 
                 {attempt.failureReasons.map((reason) => (
-                    <Text key={reason} type="caption" style={{color: error}}>
+                    <Text key={reason} type="caption" color={error}>
                         {reason}
                     </Text>
                 ))}
 
                 {attempt.passed ? (
                     <Button
+                        testID="view-certificate"
                         title="View certificate"
                         onPress={() => {
                             resetExam();
@@ -167,6 +172,7 @@ const ExamScreen = () => {
                     />
                 ) : (
                     <Button
+                        testID="back-to-practice"
                         title="Back to practice"
                         onPress={() => {
                             resetExam();
@@ -181,7 +187,9 @@ const ExamScreen = () => {
     if (!question) {
         return (
             <Screen centered>
-                <Text type="subtitle">Preparing the exam...</Text>
+                <Text type="subtitle" align="center">
+                    Preparing the exam...
+                </Text>
             </Screen>
         );
     }
@@ -189,7 +197,35 @@ const ExamScreen = () => {
     const isLast = index >= questionIds.length - 1;
 
     return (
-        <Screen>
+        <Screen
+            resetKey={question.id}
+            footer={
+                <Row spacing={SPACING[3]} alignment="center">
+                    <Button
+                        testID="exam-back"
+                        title="Back"
+                        variant="outlined"
+                        disabled={index === 0}
+                        onPress={previousQuestion}
+                    />
+                    <Spacer flexible />
+                    <Button
+                        testID="exam-next"
+                        title={isLast ? "Submit exam" : "Next"}
+                        disabled={
+                            !isLast &&
+                            !isResponseComplete(
+                                question,
+                                responses[question.id]
+                            )
+                        }
+                        onPress={() =>
+                            isLast ? void submitExam() : nextQuestion()
+                        }
+                    />
+                </Row>
+            }
+        >
             <AppBar title="Certification exam" />
 
             <ChallengeTimer
@@ -207,28 +243,8 @@ const ExamScreen = () => {
                 onRespond={(targetId) => respond({question, targetId})}
             />
 
-            <View style={styles.controls}>
-                <Button
-                    title="Back"
-                    disabled={index === 0}
-                    style={styles.controlButton}
-                    onPress={previousQuestion}
-                />
-                <Button
-                    title={isLast ? "Submit exam" : "Next"}
-                    disabled={
-                        !isLast &&
-                        !isResponseComplete(question, responses[question.id])
-                    }
-                    style={styles.controlButton}
-                    onPress={() =>
-                        isLast ? void submitExam() : nextQuestion()
-                    }
-                />
-            </View>
-
-            <Text type="caption" style={styles.progressText}>
-                {answeredCount} of {questionIds.length} answered
+            <Text type="caption" align="center">
+                {`${answeredCount} of ${questionIds.length} answered`}
             </Text>
         </Screen>
     );
