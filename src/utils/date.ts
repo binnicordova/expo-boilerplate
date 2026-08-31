@@ -33,3 +33,6 @@ export const addMonths = (value: Date | string, months: number): Date => {
 
 export const isDue = (dueAt: string, reference: Date = new Date()): boolean =>
     new Date(dueAt).getTime() <= reference.getTime();
+
+export const formatDate = (value: Date | string, locale: string): string =>
+    new Date(value).toLocaleDateString(locale);

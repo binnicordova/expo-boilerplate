@@ -196,7 +196,10 @@ describe("planNotifications", () => {
         );
 
         expect(planned[0].trigger).toBe("streak-save");
-        expect(planned[0].title).toContain("5-day streak");
+        expect(planned[0].title).toEqual({
+            key: "notifications.streakSave.title",
+            params: {count: 5},
+        });
     });
 
     it("falls back to level-appropriate copy once signals run out", () => {
@@ -215,7 +218,7 @@ describe("planNotifications", () => {
 
         expect(newcomer[0].tier).toBe("newcomer");
         expect(candidate[0].tier).toBe("candidate");
-        expect(newcomer[0].body).not.toBe(candidate[0].body);
+        expect(newcomer[0].body).not.toEqual(candidate[0].body);
     });
 
     it("keeps every notification unique so none are dropped", () => {
@@ -250,7 +253,10 @@ describe("planNotifications", () => {
         );
 
         expect(planned.trigger).toBe("reviews-due");
-        expect(planned.title).toContain("7 questions");
+        expect(planned.title).toEqual({
+            key: "notifications.reviewsDue.title",
+            params: {count: 7},
+        });
     });
 
     it("names the weakest domain when winning a lapsed user back", () => {
@@ -285,7 +291,10 @@ describe("planNotifications", () => {
 
         const winBack = planned.find((entry) => entry.trigger === "win-back");
 
-        expect(winBack?.body).toContain("Node.js");
+        expect(winBack?.body).toEqual({
+            key: "notifications.winBack.bodyWeakest",
+            params: {domain: "node"},
+        });
     });
 
     it("stays under the platform pending notification limit", () => {

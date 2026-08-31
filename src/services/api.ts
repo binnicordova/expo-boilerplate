@@ -8,8 +8,8 @@ import {
     type SessionRequest,
 } from "@/services/assessment";
 import {http} from "@/services/http";
-import content from "./mocks/content.json";
-import questions from "./mocks/questions.json";
+import content from "./mocks/es-content.json";
+import questions from "./mocks/es-questions.json";
 
 export type CertificationSyncPayload = {
     userId: string;

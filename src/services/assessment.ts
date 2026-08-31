@@ -6,11 +6,11 @@ import {
 import type {Question} from "@/models/article";
 import type {AssessmentQuestion, Difficulty, Domain} from "@/models/assessment";
 import type {Content} from "@/models/content";
-import {AUTHORED_ASSESSMENTS} from "@/services/mocks/assessments";
+import {AUTHORED_ASSESSMENTS} from "@/services/mocks/en-assessments";
 import {rankByAdaptiveFit} from "@/utils/adaptive";
 import {summarize} from "@/utils/html";
-import content from "./mocks/content.json";
-import questions from "./mocks/questions.json";
+import content from "./mocks/es-content.json";
+import questions from "./mocks/es-questions.json";
 
 const LEGACY_DOMAIN: Domain = "react";
 

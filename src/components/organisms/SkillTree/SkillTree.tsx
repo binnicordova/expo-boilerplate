@@ -4,7 +4,7 @@ import type {IconName} from "@/components/atoms/Icon/icons";
 import {ProgressBar} from "@/components/atoms/ProgressBar/ProgressBar";
 import {Text} from "@/components/atoms/Text/Text";
 import {Card} from "@/components/molecules/Card/Card";
-import {DOMAIN_LABEL} from "@/constants/assessment";
+import {useTranslation} from "@/i18n";
 import type {SkillNodeStatus, SkillNodeView} from "@/models/progression";
 import {FONT_SIZE} from "@/theme/fonts";
 import {OPACITY} from "@/theme/opcacity";
@@ -25,6 +25,7 @@ const FULL_WIDTH = {width: "100%"} as const;
 
 export const SkillTree = ({nodes}: SkillTreeProps) => {
     const {accent, background, darkness, lightness, text} = useTheme();
+    const {t} = useTranslation();
 
     return (
         <Column spacing={SPACING[3]} style={FULL_WIDTH} testID="skill-tree">
@@ -51,11 +52,11 @@ export const SkillTree = ({nodes}: SkillTreeProps) => {
                                 color={tone}
                             />
                             <Text type="label" color={darkness}>
-                                {node.label}
+                                {t(node.labelKey)}
                             </Text>
                             <Spacer flexible />
                             <Text type="caption" color={text}>
-                                {DOMAIN_LABEL[node.domain]}
+                                {t(`domain.${node.domain}`)}
                             </Text>
                         </Row>
 
@@ -67,8 +68,12 @@ export const SkillTree = ({nodes}: SkillTreeProps) => {
 
                         <Text type="caption" color={text}>
                             {node.status === "mastered"
-                                ? "Mastered"
-                                : `Requires ${Math.round(node.masteryRequired * 100)}% mastery`}
+                                ? t("skills.mastered")
+                                : t("skills.requirement", {
+                                      percentage: Math.round(
+                                          node.masteryRequired * 100
+                                      ),
+                                  })}
                         </Text>
                     </Card>
                 );

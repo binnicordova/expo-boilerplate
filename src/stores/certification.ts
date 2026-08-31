@@ -2,6 +2,7 @@ import {atom} from "jotai";
 import {atomWithStorage, unwrap} from "jotai/utils";
 import {EXAM_DURATION_SECONDS, EXAM_LENGTH} from "@/constants/certification";
 import {STORAGE_ID} from "@/constants/storage";
+import type {TranslationKey} from "@/i18n/types";
 import type {AssessmentQuestion} from "@/models/assessment";
 import type {ExamAttempt, ExamStatus} from "@/models/certification";
 import {api} from "@/services/api";
@@ -26,7 +27,7 @@ export const examAttemptsValueAtom = unwrap(
 );
 
 export const examStatusAtom = atom<ExamStatus>("idle");
-export const examErrorAtom = atom<string | null>(null);
+export const examErrorAtom = atom<TranslationKey | null>(null);
 export const examQuestionIdsAtom = atom<string[]>([]);
 export const examIndexAtom = atom(0);
 export const examStartedAtAtom = atom<string | null>(null);
@@ -73,12 +74,9 @@ export const startExamAtom = atom(null, async (get, set) => {
         set(examStatusAtom, "running");
 
         return true;
-    } catch (error) {
+    } catch {
         set(examStatusAtom, "error");
-        set(
-            examErrorAtom,
-            error instanceof Error ? error.message : "Could not start the exam"
-        );
+        set(examErrorAtom, "exam.startFailed");
         return false;
     }
 });

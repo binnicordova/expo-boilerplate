@@ -10,11 +10,13 @@ import {Card} from "@/components/molecules/Card/Card";
 import {Screen} from "@/components/templates/Screen/Screen";
 import {PASS_OVERALL} from "@/constants/certification";
 import {PATHS} from "@/constants/routes";
+import {useTranslation} from "@/i18n";
 import {certificationByUserAtom, ensureUserAtom, userAtom} from "@/stores/user";
 import {RADIUS} from "@/theme/border";
 import {SPACING} from "@/theme/spacing";
 import {pill} from "@/theme/ui";
 import {useTheme} from "@/theme/useTheme";
+import {formatDate} from "@/utils/date";
 
 const QR_SURFACE = "#FFFFFF";
 const FULL_WIDTH = {width: "100%"} as const;
@@ -42,6 +44,7 @@ const ResultByIdScreen = () => {
     const record = routeId ? certifications[routeId] : undefined;
 
     const {accent, background, darkness, text} = useTheme();
+    const {t, locale} = useTranslation();
     const {width} = useWindowDimensions();
 
     useEffect(() => {
@@ -61,11 +64,13 @@ const ResultByIdScreen = () => {
         <Screen centered>
             <Card alignment="center" testID="certificate-card">
                 <Text type="title" color={darkness} align="center">
-                    Certification
+                    {t("certificate.title")}
                 </Text>
 
                 <Text type="caption" color={text} align="center">
-                    {`ID: ${routeId ?? "Not provided"}`}
+                    {t("certificate.id", {
+                        id: routeId ?? t("certificate.idMissing"),
+                    })}
                 </Text>
 
                 {!record && (
@@ -75,10 +80,12 @@ const ResultByIdScreen = () => {
                         style={FULL_WIDTH}
                     >
                         <Text type="error" align="center">
-                            No certification issued for this ID.
+                            {t("certificate.missing")}
                         </Text>
                         <Text type="caption" color={text} align="center">
-                            {`The credential is earned by passing the certification exam at ${Math.round(PASS_OVERALL * 100)}% or above.`}
+                            {t("certificate.missingHint", {
+                                passMark: Math.round(PASS_OVERALL * 100),
+                            })}
                         </Text>
                     </Column>
                 )}
@@ -97,7 +104,9 @@ const ResultByIdScreen = () => {
                                 type="label"
                                 color={isValid ? background : accent}
                             >
-                                {isValid ? "CERTIFIED" : "EXPIRED"}
+                                {isValid
+                                    ? t("certificate.valid")
+                                    : t("certificate.expired")}
                             </Text>
                         </Column>
 
@@ -105,16 +114,28 @@ const ResultByIdScreen = () => {
                             {record.name}
                         </Text>
                         <Text type="subtitle" color={darkness} align="center">
-                            {`${record.score} / ${record.total} · ${record.percentage}%`}
+                            {t("certificate.score", {
+                                score: record.score,
+                                total: record.total,
+                                percentage: record.percentage,
+                            })}
                         </Text>
                         <Text type="caption" color={text} align="center">
-                            {`Expert section: ${Math.round(record.expertScore * 100)}%`}
+                            {t("certificate.expert", {
+                                percentage: Math.round(
+                                    record.expertScore * 100
+                                ),
+                            })}
                         </Text>
                         <Text type="caption" color={text} align="center">
-                            {`Issued ${new Date(record.issuedAt).toLocaleDateString()}`}
+                            {t("certificate.issued", {
+                                date: formatDate(record.issuedAt, locale),
+                            })}
                         </Text>
                         <Text type="caption" color={text} align="center">
-                            {`Valid until ${new Date(record.validUntil).toLocaleDateString()}`}
+                            {t("certificate.validUntil", {
+                                date: formatDate(record.validUntil, locale),
+                            })}
                         </Text>
 
                         <Column
@@ -135,7 +156,11 @@ const ResultByIdScreen = () => {
                 {isOwner && (
                     <Button
                         testID="certificate-action"
-                        title={record ? "Back to practice" : "Practice now"}
+                        title={
+                            record
+                                ? t("certificate.backToPractice")
+                                : t("certificate.practiceNow")
+                        }
                         onPress={() => router.replace(PATHS.HOME)}
                     />
                 )}

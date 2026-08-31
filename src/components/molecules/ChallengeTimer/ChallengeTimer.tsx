@@ -1,6 +1,7 @@
 import {Column, Row, Spacer} from "@expo/ui";
 import {ProgressBar} from "@/components/atoms/ProgressBar/ProgressBar";
 import {Text} from "@/components/atoms/Text/Text";
+import {useTranslation} from "@/i18n";
 import {SPACING} from "@/theme/spacing";
 import {useTheme} from "@/theme/useTheme";
 
@@ -23,6 +24,7 @@ export const ChallengeTimer = ({
     total,
 }: ChallengeTimerProps) => {
     const {accent, darkness, error, text} = useTheme();
+    const {t} = useTranslation();
     const ratio = totalSeconds ? remainingSeconds / totalSeconds : 0;
     const tone = ratio <= WARNING_RATIO ? error : accent;
 
@@ -38,7 +40,7 @@ export const ChallengeTimer = ({
                 </Text>
                 <Spacer flexible />
                 <Text type="label" color={tone}>
-                    {`${remainingSeconds}s`}
+                    {t("challenge.remaining", {seconds: remainingSeconds})}
                 </Text>
             </Row>
 
@@ -49,7 +51,7 @@ export const ChallengeTimer = ({
             />
 
             <Text type="caption" color={text}>
-                {`${answered} of ${total} answered`}
+                {t("challenge.answered", {answered, total})}
             </Text>
         </Column>
     );

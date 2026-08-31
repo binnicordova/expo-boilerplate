@@ -1,3 +1,4 @@
+import type {TranslationRef} from "@/i18n/types";
 import type {Difficulty, Domain} from "@/models/assessment";
 
 export type ExamStatus =
@@ -10,7 +11,7 @@ export type ExamStatus =
 
 export type ReadinessRequirement = {
     id: string;
-    label: string;
+    label: TranslationRef;
     current: number;
     target: number;
     met: boolean;
@@ -43,7 +44,7 @@ export type ExamGrade = {
     passed: boolean;
     expertScore: number;
     weakestDomain: DomainBreakdown | null;
-    failureReasons: string[];
+    failureReasons: TranslationRef[];
     byDomain: DomainBreakdown[];
     byDifficulty: DifficultyBreakdown[];
 };

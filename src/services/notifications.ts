@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import {isTV} from "@/constants/platform";
 import {STORAGE_ID} from "@/constants/storage";
+import {translateRef} from "@/i18n";
 import type {PlannedNotification} from "@/models/notification";
 import {
     cancelEngagementNotifications,
@@ -79,8 +80,8 @@ export const syncScheduledNotifications = async (
         }
 
         await scheduleNotificationAt({
-            title: entry.title,
-            body: entry.body,
+            title: translateRef(entry.title),
+            body: translateRef(entry.body),
             fireAt,
             data: {
                 path: entry.path,

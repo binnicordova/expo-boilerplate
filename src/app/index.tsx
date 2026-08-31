@@ -17,6 +17,7 @@ import {Screen} from "@/components/templates/Screen/Screen";
 import {PRACTICE_MAX_OPTIONS} from "@/constants/assessment";
 import {CHECKPOINT_INTERVAL} from "@/constants/certification";
 import {PATHS} from "@/constants/routes";
+import {useTranslation} from "@/i18n";
 import {cooldownAtom, readinessAtom} from "@/stores/certification";
 import {
     notificationPermissionAtom,
@@ -94,6 +95,7 @@ const HomeScreen = () => {
     const setNotificationsEnabled = useSetAtom(setNotificationsEnabledAtom);
     const router = useRouter();
     const {surface} = useTheme();
+    const {t} = useTranslation();
 
     const [dismissedDigestFor, setDismissedDigestFor] = useState<string | null>(
         null
@@ -122,7 +124,7 @@ const HomeScreen = () => {
         return (
             <Screen centered>
                 <Text type="title" align="center">
-                    Preparing your session...
+                    {t("practice.preparing")}
                 </Text>
             </Screen>
         );
@@ -132,11 +134,11 @@ const HomeScreen = () => {
         return (
             <Screen centered>
                 <Text type="error" align="center">
-                    {quizError ?? "Could not load."}
+                    {t(quizError ?? "practice.sessionFailed")}
                 </Text>
                 <Button
                     testID="retry-quiz"
-                    title="Try again"
+                    title={t("common.tryAgain")}
                     onPress={() => void initializeQuiz()}
                 />
             </Screen>
@@ -146,7 +148,7 @@ const HomeScreen = () => {
     if (checkpoint) {
         return (
             <Screen>
-                <AppBar title="Checkpoint" />
+                <AppBar title={t("checkpoint.title")} />
 
                 <ProgressHeader
                     level={level}
@@ -189,11 +191,11 @@ const HomeScreen = () => {
         return (
             <Screen centered>
                 <Text type="error" align="center">
-                    {questionError}
+                    {t(questionError)}
                 </Text>
                 <Button
                     testID="reload-question"
-                    title="Reload question"
+                    title={t("practice.reloadQuestion")}
                     onPress={() => void fetchQuestion(currentQuestionId)}
                 />
             </Screen>
@@ -204,7 +206,7 @@ const HomeScreen = () => {
         return (
             <Screen centered>
                 <Text type="subtitle" align="center">
-                    No question available.
+                    {t("practice.noQuestion")}
                 </Text>
             </Screen>
         );
@@ -217,7 +219,7 @@ const HomeScreen = () => {
             header={
                 <>
                     <AppBar
-                        title="Practice"
+                        title={t("practice.title")}
                         actions={() => (
                             <Row alignment="center" spacing={SPACING[2]}>
                                 <IconButton
@@ -250,7 +252,11 @@ const HomeScreen = () => {
             footer={
                 <Button
                     testID="primary-action"
-                    title={isRevealed ? "Next question" : "Check answer"}
+                    title={
+                        isRevealed
+                            ? t("practice.nextQuestion")
+                            : t("practice.checkAnswer")
+                    }
                     disabled={!isRevealed && !canSubmit}
                     onPress={() =>
                         isRevealed
@@ -294,7 +300,7 @@ const HomeScreen = () => {
 
                         <Button
                             testID="digest-next"
-                            title="Next question"
+                            title={t("practice.nextQuestion")}
                             onPress={() => {
                                 setDismissedDigestFor(question.id);
                                 void goToNextQuestion();

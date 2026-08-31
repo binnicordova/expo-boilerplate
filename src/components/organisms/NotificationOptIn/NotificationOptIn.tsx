@@ -4,6 +4,7 @@ import {Icon} from "@/components/atoms/Icon/Icon";
 import {Text} from "@/components/atoms/Text/Text";
 import {Card} from "@/components/molecules/Card/Card";
 import {DAILY_SLOT_HOURS} from "@/constants/notifications";
+import {useTranslation} from "@/i18n";
 import {FONT_SIZE} from "@/theme/fonts";
 import {SPACING} from "@/theme/spacing";
 import {useTheme} from "@/theme/useTheme";
@@ -22,6 +23,7 @@ export const NotificationOptIn = ({
     onDismiss,
 }: NotificationOptInProps) => {
     const {accent, darkness, text} = useTheme();
+    const {t} = useTranslation();
 
     return (
         <Card testID="notification-opt-in">
@@ -29,24 +31,26 @@ export const NotificationOptIn = ({
                 <Icon name="notification" size={FONT_SIZE[2]} color={accent} />
                 <Text type="label" color={darkness}>
                     {streak > 1
-                        ? `Protect your ${streak}-day streak`
-                        : "Get reminded when it matters"}
+                        ? t("notificationOptIn.titleWithStreak", {days: streak})
+                        : t("notificationOptIn.title")}
                 </Text>
             </Row>
 
             <Text type="caption" color={text}>
-                {`Reminders land ${DAILY_SLOT_HOURS.length} times a day at the moments that matter — reviews due, streak at risk, exam unlocked. Never overnight.`}
+                {t("notificationOptIn.body", {
+                    times: DAILY_SLOT_HOURS.length,
+                })}
             </Text>
 
             <Column spacing={SPACING[2]} style={FULL_WIDTH}>
                 <Button
                     testID="notifications-enable"
-                    title="Turn on reminders"
+                    title={t("notificationOptIn.enable")}
                     onPress={onEnable}
                 />
                 <Button
                     testID="notifications-dismiss"
-                    title="Not now"
+                    title={t("notificationOptIn.dismiss")}
                     variant="outlined"
                     onPress={onDismiss}
                 />

@@ -9,20 +9,6 @@ export const DOMAINS: Domain[] = [
     "node",
 ];
 
-export const DOMAIN_LABEL: Record<Domain, string> = {
-    react: "React",
-    "react-native": "React Native",
-    typescript: "TypeScript",
-    architecture: "System Architecture",
-    node: "Node.js",
-};
-
-export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
-    0: "Foundation",
-    1: "Professional",
-    2: "Expert",
-};
-
 export const XP_BY_DIFFICULTY: Record<Difficulty, number> = {
     0: 10,
     1: 20,
@@ -56,7 +42,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     {
         id: "rapid-debug-60",
         domain: "react",
-        label: "60s Rapid Debugging",
+        labelKey: "challenge.definition.rapid-debug-60",
         durationSeconds: 60,
         questionCount: 6,
         passingStreak: 4,
@@ -64,7 +50,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     {
         id: "typescript-sprint-90",
         domain: "typescript",
-        label: "90s TypeScript Sprint",
+        labelKey: "challenge.definition.typescript-sprint-90",
         durationSeconds: 90,
         questionCount: 8,
         passingStreak: 5,
@@ -72,7 +58,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     {
         id: "architecture-drill-120",
         domain: "architecture",
-        label: "120s Architecture Drill",
+        labelKey: "challenge.definition.architecture-drill-120",
         durationSeconds: 120,
         questionCount: 6,
         passingStreak: 4,
@@ -83,49 +69,49 @@ export const SKILL_TREE: SkillNode[] = [
     {
         id: "react-fundamentals",
         domain: "react",
-        label: "React Fundamentals",
+        labelKey: "skills.node.react-fundamentals",
         dependsOn: [],
         masteryRequired: 0.6,
     },
     {
         id: "react-hooks",
         domain: "react",
-        label: "Hooks & Effects",
+        labelKey: "skills.node.react-hooks",
         dependsOn: ["react-fundamentals"],
         masteryRequired: 0.65,
     },
     {
         id: "typescript-generics",
         domain: "typescript",
-        label: "TypeScript Generics",
+        labelKey: "skills.node.typescript-generics",
         dependsOn: ["react-fundamentals"],
         masteryRequired: 0.7,
     },
     {
         id: "state-machines",
         domain: "architecture",
-        label: "State Machines",
+        labelKey: "skills.node.state-machines",
         dependsOn: ["react-hooks", "typescript-generics"],
         masteryRequired: 0.7,
     },
     {
         id: "rendering-performance",
         domain: "react-native",
-        label: "Rendering Performance",
+        labelKey: "skills.node.rendering-performance",
         dependsOn: ["react-hooks"],
         masteryRequired: 0.7,
     },
     {
         id: "native-modules",
         domain: "react-native",
-        label: "Native Modules",
+        labelKey: "skills.node.native-modules",
         dependsOn: ["state-machines", "rendering-performance"],
         masteryRequired: 0.75,
     },
     {
         id: "streaming-ssr",
         domain: "node",
-        label: "Streaming SSR",
+        labelKey: "skills.node.streaming-ssr",
         dependsOn: ["state-machines"],
         masteryRequired: 0.75,
     },

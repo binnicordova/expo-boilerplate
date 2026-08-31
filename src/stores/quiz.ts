@@ -4,6 +4,7 @@ import {
     PRACTICE_BATCH,
     PRACTICE_PREFETCH_THRESHOLD,
 } from "@/constants/certification";
+import type {TranslationKey} from "@/i18n/types";
 import type {AssessmentQuestion, Difficulty, Domain} from "@/models/assessment";
 import type {Badge} from "@/models/progression";
 import {api} from "@/services/api";
@@ -41,7 +42,7 @@ export type SessionCheckpoint = {
 export const quizAtom = atom<string[]>([]);
 export const currentQuestionIndexAtom = atom(0);
 export const quizStatusAtom = atom<QuizStatus>("idle");
-export const quizErrorAtom = atom<string | null>(null);
+export const quizErrorAtom = atom<TranslationKey | null>(null);
 export const quizDomainAtom = atom<Domain | undefined>(undefined);
 export const adaptiveDifficultyAtom = atom<Difficulty>(0);
 export const adaptiveHistoryAtom = atom<boolean[]>([]);
@@ -105,14 +106,9 @@ export const initializeQuizAtom = atom(
             set(quizAtom, batch);
             set(currentQuestionIndexAtom, 0);
             set(quizStatusAtom, "ready");
-        } catch (error) {
+        } catch {
             set(quizStatusAtom, "error");
-            set(
-                quizErrorAtom,
-                error instanceof Error
-                    ? error.message
-                    : "Could not load the session"
-            );
+            set(quizErrorAtom, "practice.sessionFailed");
         }
     }
 );

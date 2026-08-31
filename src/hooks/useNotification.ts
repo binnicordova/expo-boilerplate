@@ -3,7 +3,7 @@ import {router} from "expo-router";
 import {Alert, Linking, Platform} from "react-native";
 import {isTV} from "@/constants/platform";
 import {PATHS} from "@/constants/routes";
-import {STRINGS} from "@/constants/strings";
+import {translate} from "@/i18n";
 import {requestNotificationPermission} from "@/services/notifications";
 import {theme} from "@/theme/colors";
 import {
@@ -35,11 +35,11 @@ export const setNotificationOpenHandler = (handler: () => void) => {
 
 export const promptNotificationSettings = () =>
     Alert.alert(
-        STRINGS.notification.alert_permission_title,
-        STRINGS.notification.alert_permission_message,
+        translate("notificationPermission.title"),
+        translate("notificationPermission.message"),
         [
             {
-                text: STRINGS.notification.alert_permission_button,
+                text: translate("notificationPermission.confirm"),
                 onPress: () => Linking.openSettings(),
             },
         ]
@@ -71,8 +71,8 @@ export const initNotification = () => {
         }
 
         void scheduleLocalNotification(
-            content.title || STRINGS.appName,
-            content.body || STRINGS.appName,
+            content.title || translate("common.appName"),
+            content.body || translate("common.appName"),
             {url}
         );
     });
@@ -90,7 +90,9 @@ export const initNotification = () => {
         }
 
         if (url) {
-            router.push(PATHS.WEB(url, content.body || STRINGS.appName));
+            router.push(
+                PATHS.WEB(url, content.body || translate("common.appName"))
+            );
         }
     });
 };

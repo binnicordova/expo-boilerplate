@@ -9,13 +9,13 @@ import {ChallengeTimer} from "@/components/molecules/ChallengeTimer/ChallengeTim
 import {QuestionCard} from "@/components/organisms/QuestionCard/QuestionCard";
 import {ReadinessCard} from "@/components/organisms/ReadinessCard/ReadinessCard";
 import {Screen} from "@/components/templates/Screen/Screen";
-import {DOMAIN_LABEL} from "@/constants/assessment";
 import {
     EXAM_DURATION_SECONDS,
     EXAM_LENGTH,
     PASS_OVERALL,
 } from "@/constants/certification";
 import {useCountdown} from "@/hooks/useCountdown";
+import {useTranslation} from "@/i18n";
 import type {AssessmentQuestion} from "@/models/assessment";
 import {api} from "@/services/api";
 import {
@@ -42,6 +42,7 @@ const FULL_WIDTH = {width: "100%"} as const;
 
 const ExamScreen = () => {
     const {accent, darkness, error, text} = useTheme();
+    const {t, tRef} = useTranslation();
     const router = useRouter();
 
     const status = useAtomValue(examStatusAtom);
@@ -97,10 +98,14 @@ const ExamScreen = () => {
     if (status === "idle" || status === "loading" || status === "error") {
         return (
             <Screen>
-                <AppBar title="Certification" />
+                <AppBar title={t("exam.title")} />
 
                 <Text type="caption">
-                    {`${EXAM_LENGTH} questions · ${Math.round(EXAM_DURATION_SECONDS / 60)} minutes · ${Math.round(PASS_OVERALL * 100)}% to pass. Explanations stay hidden until you submit.`}
+                    {t("exam.blurb", {
+                        questions: EXAM_LENGTH,
+                        minutes: Math.round(EXAM_DURATION_SECONDS / 60),
+                        passMark: Math.round(PASS_OVERALL * 100),
+                    })}
                 </Text>
 
                 <ReadinessCard
@@ -115,23 +120,27 @@ const ExamScreen = () => {
     if (status === "complete" && attempt) {
         return (
             <Screen>
-                <AppBar title="Exam result" />
+                <AppBar title={t("exam.resultTitle")} />
 
                 <Text
                     type="title"
                     color={attempt.passed ? accent : error}
                     align="center"
                 >
-                    {attempt.passed ? "Certified" : "Not this time"}
+                    {attempt.passed ? t("exam.passed") : t("exam.failed")}
                 </Text>
 
                 <Text type="subtitle" align="center">
-                    {`${attempt.score} / ${attempt.total} · ${attempt.percentage}%`}
+                    {t("exam.score", {
+                        score: attempt.score,
+                        total: attempt.total,
+                        percentage: attempt.percentage,
+                    })}
                 </Text>
 
                 {attempt.timedOut && (
                     <Text type="caption" align="center">
-                        The time limit was reached before you submitted.
+                        {t("exam.timedOut")}
                     </Text>
                 )}
 
@@ -143,26 +152,33 @@ const ExamScreen = () => {
                             style={FULL_WIDTH}
                         >
                             <Text type="label" color={darkness}>
-                                {DOMAIN_LABEL[entry.domain]}
+                                {t(`domain.${entry.domain}`)}
                             </Text>
                             <Spacer flexible />
                             <Text type="label" color={text}>
-                                {`${entry.correct}/${entry.answered}`}
+                                {t("exam.domainScore", {
+                                    correct: entry.correct,
+                                    answered: entry.answered,
+                                })}
                             </Text>
                         </Row>
                     ))}
                 </Column>
 
                 {attempt.failureReasons.map((reason) => (
-                    <Text key={reason} type="caption" color={error}>
-                        {reason}
+                    <Text
+                        key={`${reason.key}-${reason.params?.domain ?? ""}`}
+                        type="caption"
+                        color={error}
+                    >
+                        {tRef(reason)}
                     </Text>
                 ))}
 
                 {attempt.passed ? (
                     <Button
                         testID="view-certificate"
-                        title="View certificate"
+                        title={t("exam.viewCertificate")}
                         onPress={() => {
                             resetExam();
                             router.push(
@@ -173,7 +189,7 @@ const ExamScreen = () => {
                 ) : (
                     <Button
                         testID="back-to-practice"
-                        title="Back to practice"
+                        title={t("exam.backToPractice")}
                         onPress={() => {
                             resetExam();
                             router.replace("/");
@@ -188,7 +204,7 @@ const ExamScreen = () => {
         return (
             <Screen centered>
                 <Text type="subtitle" align="center">
-                    Preparing the exam...
+                    {t("exam.preparing")}
                 </Text>
             </Screen>
         );
@@ -203,7 +219,7 @@ const ExamScreen = () => {
                 <Row spacing={SPACING[3]} alignment="center">
                     <Button
                         testID="exam-back"
-                        title="Back"
+                        title={t("common.back")}
                         variant="outlined"
                         disabled={index === 0}
                         onPress={previousQuestion}
@@ -211,7 +227,7 @@ const ExamScreen = () => {
                     <Spacer flexible />
                     <Button
                         testID="exam-next"
-                        title={isLast ? "Submit exam" : "Next"}
+                        title={isLast ? t("exam.submit") : t("common.next")}
                         disabled={
                             !isLast &&
                             !isResponseComplete(
@@ -226,10 +242,13 @@ const ExamScreen = () => {
                 </Row>
             }
         >
-            <AppBar title="Certification exam" />
+            <AppBar title={t("exam.heading")} />
 
             <ChallengeTimer
-                label={`Question ${index + 1} of ${questionIds.length}`}
+                label={t("exam.position", {
+                    current: index + 1,
+                    total: questionIds.length,
+                })}
                 remainingSeconds={remainingSeconds}
                 totalSeconds={EXAM_DURATION_SECONDS}
                 answered={answeredCount}
@@ -244,7 +263,10 @@ const ExamScreen = () => {
             />
 
             <Text type="caption" align="center">
-                {`${answeredCount} of ${questionIds.length} answered`}
+                {t("exam.answered", {
+                    answered: answeredCount,
+                    total: questionIds.length,
+                })}
             </Text>
         </Screen>
     );
