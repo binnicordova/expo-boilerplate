@@ -9,6 +9,7 @@ import {QuestionCard} from "@/components/organisms/QuestionCard/QuestionCard";
 import {Screen} from "@/components/templates/Screen/Screen";
 import {PRACTICE_MAX_OPTIONS} from "@/constants/assessment";
 import {useCountdown} from "@/hooks/useCountdown";
+import {useTranslation} from "@/i18n";
 import type {AssessmentQuestion} from "@/models/assessment";
 import {api} from "@/services/api";
 import {
@@ -44,6 +45,7 @@ const ChallengeScreen = () => {
     const respond = useSetAtom(respondAtom);
 
     const [question, setQuestion] = useState<AssessmentQuestion | null>(null);
+    const {t} = useTranslation();
 
     const currentId = questionIds[index];
 
@@ -83,11 +85,10 @@ const ChallengeScreen = () => {
     if (status === "idle" || !definition) {
         return (
             <Screen>
-                <AppBar title="Proof of Skill" />
+                <AppBar title={t("challenge.title")} />
 
                 <Text type="caption" align="center">
-                    Limited-time sprints. Answer fast and keep your accuracy
-                    above the pass mark.
+                    {t("challenge.blurb")}
                 </Text>
 
                 {challenges.map((challenge) => (
@@ -95,13 +96,17 @@ const ChallengeScreen = () => {
                         key={challenge.id}
                         testID={`challenge-${challenge.id}`}
                     >
-                        <Text type="subtitle">{challenge.label}</Text>
+                        <Text type="subtitle">{t(challenge.labelKey)}</Text>
                         <Text type="caption">
-                            {`${challenge.questionCount} questions · ${challenge.durationSeconds}s · pass at ${challenge.passingStreak}`}
+                            {t("challenge.summary", {
+                                questions: challenge.questionCount,
+                                seconds: challenge.durationSeconds,
+                                passingStreak: challenge.passingStreak,
+                            })}
                         </Text>
                         <Button
                             testID={`start-${challenge.id}`}
-                            title="Start"
+                            title={t("challenge.start")}
                             onPress={() => void startChallenge(challenge.id)}
                         />
                     </Card>
@@ -114,14 +119,19 @@ const ChallengeScreen = () => {
         return (
             <Screen centered>
                 <Text type="title" align="center">
-                    {status === "passed" ? "Challenge passed" : "Time is up"}
+                    {status === "passed"
+                        ? t("challenge.passed")
+                        : t("challenge.failed")}
                 </Text>
                 <Text type="subtitle" align="center">
-                    {`${correct} correct of ${questionIds.length}`}
+                    {t("challenge.score", {
+                        correct,
+                        total: questionIds.length,
+                    })}
                 </Text>
                 <Button
                     testID="reset-challenge"
-                    title="Back to challenges"
+                    title={t("challenge.reset")}
                     onPress={resetChallenge}
                 />
             </Screen>
@@ -132,7 +142,7 @@ const ChallengeScreen = () => {
         return (
             <Screen centered>
                 <Text type="subtitle" align="center">
-                    Loading challenge...
+                    {t("challenge.loading")}
                 </Text>
             </Screen>
         );
@@ -147,7 +157,7 @@ const ChallengeScreen = () => {
             footer={
                 <Button
                     testID="challenge-submit"
-                    title="Submit"
+                    title={t("challenge.submit")}
                     disabled={!canSubmit}
                     onPress={() =>
                         advanceChallenge({
@@ -157,10 +167,10 @@ const ChallengeScreen = () => {
                 />
             }
         >
-            <AppBar title={definition.label} />
+            <AppBar title={t(definition.labelKey)} />
 
             <ChallengeTimer
-                label={definition.label}
+                label={t(definition.labelKey)}
                 remainingSeconds={remainingSeconds}
                 totalSeconds={definition.durationSeconds}
                 answered={index}

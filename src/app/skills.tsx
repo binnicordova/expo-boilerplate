@@ -1,9 +1,11 @@
 import {useAtomValue} from "jotai";
 import {Text} from "@/components/atoms/Text/Text";
 import {AppBar} from "@/components/molecules/AppBar/AppBar";
+import {LanguagePicker} from "@/components/organisms/LanguagePicker/LanguagePicker";
 import {ProgressHeader} from "@/components/organisms/ProgressHeader/ProgressHeader";
 import {SkillTree} from "@/components/organisms/SkillTree/SkillTree";
 import {Screen} from "@/components/templates/Screen/Screen";
+import {useTranslation} from "@/i18n";
 import {
     badgesAtom,
     levelAtom,
@@ -21,10 +23,11 @@ const SkillsScreen = () => {
     const badges = useAtomValue(badgesAtom);
     const streak = useAtomValue(activeStreakAtom);
     const dueReviews = useAtomValue(dueReviewsAtom);
+    const {t} = useTranslation();
 
     return (
         <Screen>
-            <AppBar title="Skill Tree" />
+            <AppBar title={t("skills.title")} />
 
             <ProgressHeader
                 level={level}
@@ -36,11 +39,12 @@ const SkillsScreen = () => {
             />
 
             <Text type="caption" align="center">
-                Nodes unlock as the domains they depend on reach their mastery
-                threshold.
+                {t("skills.blurb")}
             </Text>
 
             <SkillTree nodes={nodes} />
+
+            <LanguagePicker />
         </Screen>
     );
 };

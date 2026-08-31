@@ -1,4 +1,5 @@
 import {isTV} from "@/constants/platform";
+import "@/i18n";
 import {initBackgroundFetch} from "./hooks/useBackgroundFetch";
 import {initNotification} from "./hooks/useNotification";
 import {initFetchUpdate} from "./hooks/useUpdates";

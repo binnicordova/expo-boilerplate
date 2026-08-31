@@ -150,7 +150,10 @@ describe("gradeExam", () => {
         );
 
         expect(grade.passed).toBe(false);
-        expect(grade.failureReasons[0]).toContain("below the 80% pass mark");
+        expect(grade.failureReasons[0]).toEqual({
+            key: "exam.failure.overall",
+            params: {percentage: grade.percentage, passMark: 80},
+        });
     });
 
     it("fails a candidate who is strong overall but weak on expert questions", () => {
@@ -162,8 +165,8 @@ describe("gradeExam", () => {
         expect(grade.percentage).toBeGreaterThanOrEqual(60);
         expect(grade.passed).toBe(false);
         expect(
-            grade.failureReasons.some((reason) =>
-                reason.includes("Expert section")
+            grade.failureReasons.some(
+                (reason) => reason.key === "exam.failure.expert"
             )
         ).toBe(true);
     });
@@ -176,7 +179,11 @@ describe("gradeExam", () => {
 
         expect(grade.passed).toBe(false);
         expect(
-            grade.failureReasons.some((reason) => reason.includes("react"))
+            grade.failureReasons.some(
+                (reason) =>
+                    reason.key === "exam.failure.domain" &&
+                    reason.params?.domain === "react"
+            )
         ).toBe(true);
         expect(grade.weakestDomain?.domain).toBe("react");
     });

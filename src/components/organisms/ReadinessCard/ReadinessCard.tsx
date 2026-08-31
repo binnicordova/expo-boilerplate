@@ -4,6 +4,7 @@ import {Icon} from "@/components/atoms/Icon/Icon";
 import {ProgressBar} from "@/components/atoms/ProgressBar/ProgressBar";
 import {Text} from "@/components/atoms/Text/Text";
 import {Card} from "@/components/molecules/Card/Card";
+import {useTranslation} from "@/i18n";
 import type {CooldownState, Readiness} from "@/models/certification";
 import {FONT_SIZE} from "@/theme/fonts";
 import {SPACING} from "@/theme/spacing";
@@ -24,6 +25,7 @@ export const ReadinessCard = ({
     onStart,
 }: ReadinessCardProps) => {
     const {accent, darkness, muted, success, text} = useTheme();
+    const {t, tRef} = useTranslation();
 
     const locked = !readiness.eligible || cooldown.blocked;
 
@@ -31,11 +33,13 @@ export const ReadinessCard = ({
         <Card testID="readiness-card">
             <Row alignment="center" style={FULL_WIDTH}>
                 <Text type="caption" color={accent}>
-                    Certification exam
+                    {t("readiness.title")}
                 </Text>
                 <Spacer flexible />
                 <Text type="caption" color={text}>
-                    {`${Math.round(readiness.progress * 100)}% ready`}
+                    {t("readiness.ready", {
+                        percentage: Math.round(readiness.progress * 100),
+                    })}
                 </Text>
             </Row>
 
@@ -58,14 +62,20 @@ export const ReadinessCard = ({
                             color={requirement.met ? success : muted}
                         />
                         <Text type="label" color={text}>
-                            {requirement.label}
+                            {tRef(requirement.label)}
                         </Text>
                         <Spacer flexible />
                         <Text
                             type="caption"
                             color={requirement.met ? success : darkness}
                         >
-                            {`${Math.min(requirement.current, requirement.target)} / ${requirement.target}`}
+                            {t("readiness.progress", {
+                                current: Math.min(
+                                    requirement.current,
+                                    requirement.target
+                                ),
+                                target: requirement.target,
+                            })}
                         </Text>
                     </Row>
                 ))}
@@ -73,15 +83,17 @@ export const ReadinessCard = ({
 
             {cooldown.blocked ? (
                 <Text type="caption" color={text}>
-                    {`Next attempt available in ${formatCooldown(cooldown.remainingMs)}.`}
+                    {t("readiness.cooldown", {
+                        remaining: tRef(formatCooldown(cooldown.remainingMs)),
+                    })}
                 </Text>
             ) : (
                 <Button
                     testID="start-exam"
                     title={
                         readiness.eligible
-                            ? "Start certification exam"
-                            : "Keep practising to unlock"
+                            ? t("readiness.start")
+                            : t("readiness.locked")
                     }
                     disabled={locked}
                     onPress={onStart}

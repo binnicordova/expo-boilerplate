@@ -92,6 +92,7 @@ My project follows a **SCREAMING ARCHITECTURE**, where the folder structure clea
 - 🎣 **Hooks**: `src/hooks/` (Custom React hooks)
 - 🎨 **Theme & Styles**: `src/theme/` and `src/styles/` (Design tokens and global styles)
 - 🛠️ **Utils**: `src/utils/` (Helper functions)
+- 🌍 **Translations**: `src/i18n/` (English + Spanish catalogues and the typed translator)
 
 ## Technical Stack Details (Architecture)
 
@@ -103,6 +104,7 @@ I've built this project with a modern and robust stack:
 - **State Management**: Jotai (Atomic state)
 - **Styling**: Styled Components / StyleSheet
 - **Design Pattern**: Atomic Design for components (Atoms, Molecules, Organisms)
+- **Internationalisation**: i18next + react-i18next + expo-localization (follows the device language, falls back to English, overridable in-app)
 - **Testing**: Jest
 
 ## Deployment (AppStore / PlayStore / Web)

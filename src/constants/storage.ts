@@ -10,6 +10,7 @@ type StorageIdType = {
     examAttempts: string;
     notificationPreferences: string;
     notificationDelivery: string;
+    locale: string;
 };
 
 export const STORAGE_ID: StorageIdType = {
@@ -24,4 +25,5 @@ export const STORAGE_ID: StorageIdType = {
     examAttempts: "examAttempts",
     notificationPreferences: "notificationPreferences",
     notificationDelivery: "notificationDelivery",
+    locale: "locale",
 };

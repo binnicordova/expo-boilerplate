@@ -1,11 +1,12 @@
 import {atom} from "jotai";
+import type {TranslationKey} from "@/i18n/types";
 import type {AssessmentQuestion, AssessmentResponse} from "@/models/assessment";
 import {isOrderingQuestion} from "@/models/assessment";
 import {api} from "@/services/api";
 import {getCorrectIds} from "@/utils/grading";
 
 export const questionAtom = atom<AssessmentQuestion | null>(null);
-export const questionErrorAtom = atom<string | null>(null);
+export const questionErrorAtom = atom<TranslationKey | null>(null);
 export const responseByQuestionAtom = atom<Record<string, AssessmentResponse>>(
     {}
 );
@@ -38,14 +39,9 @@ export const fetchQuestionAtom = atom(
 
         try {
             set(questionAtom, await api.getAssessment(questionId));
-        } catch (error) {
+        } catch {
             set(questionAtom, null);
-            set(
-                questionErrorAtom,
-                error instanceof Error
-                    ? error.message
-                    : "Could not load question"
-            );
+            set(questionErrorAtom, "practice.questionFailed");
         }
     }
 );

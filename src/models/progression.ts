@@ -1,3 +1,4 @@
+import type {TranslationKey} from "@/i18n/types";
 import type {Difficulty, Domain} from "@/models/assessment";
 
 export type DeviceIdentity = {
@@ -35,11 +36,12 @@ export type DomainMastery = {
     difficultyReached: Difficulty;
 };
 
+export type BadgeTier = "bronze" | "silver" | "gold";
+
 export type Badge = {
     id: string;
     domain: Domain;
-    label: string;
-    tier: "bronze" | "silver" | "gold";
+    tier: BadgeTier;
     unlockedAt: string;
 };
 
@@ -55,7 +57,7 @@ export type ProgressionState = {
 export type SkillNode = {
     id: string;
     domain: Domain;
-    label: string;
+    labelKey: TranslationKey;
     dependsOn: string[];
     masteryRequired: number;
 };
@@ -72,7 +74,7 @@ export type ChallengeStatus = "idle" | "running" | "passed" | "failed";
 export type ChallengeDefinition = {
     id: string;
     domain: Domain;
-    label: string;
+    labelKey: TranslationKey;
     durationSeconds: number;
     questionCount: number;
     passingStreak: number;

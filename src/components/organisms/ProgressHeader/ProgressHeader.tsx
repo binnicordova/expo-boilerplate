@@ -2,7 +2,8 @@ import {Column, Row, Spacer} from "@expo/ui";
 import {Pill} from "@/components/atoms/Pill/Pill";
 import {ProgressBar} from "@/components/atoms/ProgressBar/ProgressBar";
 import {Text} from "@/components/atoms/Text/Text";
-import type {Badge} from "@/models/progression";
+import {useTranslation} from "@/i18n";
+import type {Badge, BadgeTier} from "@/models/progression";
 import {SPACING} from "@/theme/spacing";
 import {useTheme} from "@/theme/useTheme";
 
@@ -23,7 +24,7 @@ export type ProgressHeaderProps = {
     badges: Badge[];
 };
 
-const TIER_COLOR: Record<Badge["tier"], string> = {
+const TIER_COLOR: Record<BadgeTier, string> = {
     bronze: "#B06A2C",
     silver: "#7C8B9B",
     gold: "#C79A16",
@@ -41,6 +42,7 @@ export const ProgressHeader = ({
     badges,
 }: ProgressHeaderProps) => {
     const {accent, darkness, success, surface, text} = useTheme();
+    const {t} = useTranslation();
 
     return (
         <Column
@@ -50,14 +52,14 @@ export const ProgressHeader = ({
         >
             <Row alignment="center" spacing={SPACING[2]} style={FULL_WIDTH}>
                 <Text type="label" color={darkness}>
-                    {`Level ${level} · ${xp} XP`}
+                    {t("progress.level", {level, xp})}
                 </Text>
 
                 <Spacer flexible />
 
                 <Pill
                     icon="streak"
-                    label={`${streak}d`}
+                    label={t("progress.streak", {days: streak})}
                     tone={streak > 0 ? accent : text}
                     testID="streak-pill"
                 />
@@ -76,7 +78,7 @@ export const ProgressHeader = ({
             {dailyGoal && (
                 <Row alignment="center" style={FULL_WIDTH}>
                     <Text type="caption" color={text}>
-                        Daily goal
+                        {t("progress.dailyGoal")}
                     </Text>
                     <Spacer flexible />
                     <Text
@@ -84,8 +86,11 @@ export const ProgressHeader = ({
                         color={dailyGoal.met ? success : darkness}
                     >
                         {dailyGoal.met
-                            ? "Complete"
-                            : `${dailyGoal.correct} / ${dailyGoal.target}`}
+                            ? t("progress.dailyGoalComplete")
+                            : t("progress.dailyGoalProgress", {
+                                  correct: dailyGoal.correct,
+                                  target: dailyGoal.target,
+                              })}
                     </Text>
                 </Row>
             )}
@@ -96,7 +101,10 @@ export const ProgressHeader = ({
                         <Pill
                             key={badge.id}
                             icon="badge"
-                            label={badge.label}
+                            label={t("badge.label", {
+                                domain: badge.domain,
+                                tier: badge.tier,
+                            })}
                             tone={TIER_COLOR[badge.tier]}
                             backgroundColor={surface}
                         />

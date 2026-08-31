@@ -5,6 +5,7 @@ import {
     PASS_OVERALL,
     PASS_PER_DOMAIN,
 } from "@/constants/certification";
+import type {TranslationRef} from "@/i18n/types";
 import type {
     AssessmentQuestion,
     AssessmentResponse,
@@ -46,28 +47,33 @@ export const getReadiness = (
     const requirements: ReadinessRequirement[] = [
         {
             id: "answered",
-            label: "Practice questions answered",
+            label: {key: "readiness.requirement.answered"},
             current: answered,
             target: ELIGIBILITY.answered,
             met: answered >= ELIGIBILITY.answered,
         },
         {
             id: "expert",
-            label: "Expert-level questions attempted",
+            label: {key: "readiness.requirement.expert"},
             current: expertAnswered,
             target: ELIGIBILITY.expertAnswered,
             met: expertAnswered >= ELIGIBILITY.expertAnswered,
         },
         {
             id: "domains",
-            label: "Domains above 60% mastery",
+            label: {
+                key: "readiness.requirement.domains",
+                params: {
+                    percentage: Math.round(ELIGIBILITY.domainMastery * 100),
+                },
+            },
             current: masteredDomains,
             target: ELIGIBILITY.masteredDomains,
             met: masteredDomains >= ELIGIBILITY.masteredDomains,
         },
         {
             id: "streak",
-            label: "Consecutive practice days",
+            label: {key: "readiness.requirement.streak"},
             current: streak,
             target: ELIGIBILITY.streakDays,
             met: streak >= ELIGIBILITY.streakDays,
@@ -158,25 +164,38 @@ export const gradeExam = (
         : null;
 
     const overallRatio = total ? score / total : 0;
-    const failureReasons: string[] = [];
+    const failureReasons: TranslationRef[] = [];
 
     if (overallRatio < PASS_OVERALL) {
-        failureReasons.push(
-            `Overall score ${percentage}% is below the ${Math.round(PASS_OVERALL * 100)}% pass mark`
-        );
+        failureReasons.push({
+            key: "exam.failure.overall",
+            params: {
+                percentage,
+                passMark: Math.round(PASS_OVERALL * 100),
+            },
+        });
     }
 
     if (expert && expertScore < PASS_EXPERT) {
-        failureReasons.push(
-            `Expert section ${Math.round(expertScore * 100)}% is below the required ${Math.round(PASS_EXPERT * 100)}%`
-        );
+        failureReasons.push({
+            key: "exam.failure.expert",
+            params: {
+                percentage: Math.round(expertScore * 100),
+                passMark: Math.round(PASS_EXPERT * 100),
+            },
+        });
     }
 
     for (const entry of byDomain) {
         if (entry.score < PASS_PER_DOMAIN) {
-            failureReasons.push(
-                `${entry.domain} scored ${Math.round(entry.score * 100)}%, below the ${Math.round(PASS_PER_DOMAIN * 100)}% floor`
-            );
+            failureReasons.push({
+                key: "exam.failure.domain",
+                params: {
+                    domain: entry.domain,
+                    percentage: Math.round(entry.score * 100),
+                    passMark: Math.round(PASS_PER_DOMAIN * 100),
+                },
+            });
         }
     }
 
@@ -233,14 +252,16 @@ export const getCooldown = (
     };
 };
 
-export const formatCooldown = (remainingMs: number): string => {
+export const formatCooldown = (remainingMs: number): TranslationRef => {
     const totalMinutes = Math.ceil(remainingMs / 60_000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
     if (hours >= 24) {
-        return `${Math.ceil(hours / 24)}d`;
+        return {key: "cooldown.days", params: {days: Math.ceil(hours / 24)}};
     }
 
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    return hours > 0
+        ? {key: "cooldown.hours", params: {hours, minutes}}
+        : {key: "cooldown.minutes", params: {minutes}};
 };

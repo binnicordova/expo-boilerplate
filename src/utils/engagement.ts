@@ -1,4 +1,3 @@
-import {DOMAIN_LABEL} from "@/constants/assessment";
 import {DAILY_GOAL_CORRECT, ELIGIBILITY} from "@/constants/certification";
 import {
     CERTIFICATION_RENEWAL_DAYS,
@@ -9,8 +8,10 @@ import {
     QUIET_HOURS,
     SKILL_UNLOCK_PROGRESS,
     WIN_BACK_DAYS,
+    WIN_BACK_LAPSED_DAYS,
 } from "@/constants/notifications";
 import {PATHS} from "@/constants/routes";
+import type {TranslationKey} from "@/i18n/types";
 import type {CooldownState, Readiness} from "@/models/certification";
 import type {
     LearnerTier,
@@ -122,8 +123,14 @@ const buildCandidates = (
             id: `streak-save-${today}`,
             trigger: "streak-save",
             priority: 100,
-            title: `${activeStreak}-day streak on the line`,
-            body: `One correct answer keeps it alive. You are level ${level}.`,
+            title: {
+                key: "notifications.streakSave.title",
+                params: {count: activeStreak},
+            },
+            body: {
+                key: "notifications.streakSave.body",
+                params: {level},
+            },
             path: String(PATHS.HOME),
         });
     }
@@ -133,8 +140,8 @@ const buildCandidates = (
             id: `exam-retry-${cooldown.availableAt}`,
             trigger: "exam-retry",
             priority: 95,
-            title: "Your retake is unlocked",
-            body: "The cooldown is over. Take the certification exam again.",
+            title: {key: "notifications.examRetry.title"},
+            body: {key: "notifications.examRetry.body"},
             path: String(PATHS.EXAM),
         });
     }
@@ -144,8 +151,11 @@ const buildCandidates = (
             id: `exam-unlocked-${today}`,
             trigger: "exam-unlocked",
             priority: 90,
-            title: "Certification exam unlocked",
-            body: `You cleared every requirement. ${ELIGIBILITY.answered}+ questions of practice say you are ready.`,
+            title: {key: "notifications.examUnlocked.title"},
+            body: {
+                key: "notifications.examUnlocked.body",
+                params: {answered: ELIGIBILITY.answered},
+            },
             path: String(PATHS.EXAM),
         });
     }
@@ -161,8 +171,11 @@ const buildCandidates = (
                 id: `certification-expiring-${certification.attemptId}`,
                 trigger: "certification-expiring",
                 priority: 85,
-                title: `Certification expires in ${daysLeft} days`,
-                body: "Re-certify to keep your credential valid.",
+                title: {
+                    key: "notifications.certificationExpiring.title",
+                    params: {count: daysLeft},
+                },
+                body: {key: "notifications.certificationExpiring.body"},
                 path: String(PATHS.EXAM),
             });
         }
@@ -173,8 +186,11 @@ const buildCandidates = (
             id: `reviews-due-${today}`,
             trigger: "reviews-due",
             priority: 70,
-            title: `${snapshot.dueReviews} question${snapshot.dueReviews === 1 ? "" : "s"} due for review`,
-            body: "These are the ones you missed. Now is when they stick.",
+            title: {
+                key: "notifications.reviewsDue.title",
+                params: {count: snapshot.dueReviews},
+            },
+            body: {key: "notifications.reviewsDue.body"},
             path: String(PATHS.HOME),
         });
     }
@@ -187,8 +203,11 @@ const buildCandidates = (
                 id: `daily-goal-${today}`,
                 trigger: "daily-goal",
                 priority: 60,
-                title: `${remaining} from your daily goal`,
-                body: "You are almost there. Finish the set.",
+                title: {
+                    key: "notifications.dailyGoal.title",
+                    params: {count: remaining},
+                },
+                body: {key: "notifications.dailyGoal.body"},
                 path: String(PATHS.HOME),
             });
         }
@@ -205,8 +224,16 @@ const buildCandidates = (
             id: `skill-unlock-${nextNode.id}`,
             trigger: "skill-unlock",
             priority: 50,
-            title: `${nextNode.label} is nearly unlocked`,
-            body: `You are ${Math.round((1 - nextNode.progress) * 100)}% away from mastering it.`,
+            title: {
+                key: "notifications.skillUnlock.title",
+                params: {node: nextNode.id},
+            },
+            body: {
+                key: "notifications.skillUnlock.body",
+                params: {
+                    percentage: Math.round((1 - nextNode.progress) * 100),
+                },
+            },
             path: String(PATHS.SKILLS),
         });
     }
@@ -223,12 +250,18 @@ const buildCandidates = (
                 trigger: "win-back",
                 priority: 40,
                 title:
-                    milestone >= 21
-                        ? "Your progress is still here"
-                        : `${milestone} days since your last session`,
+                    milestone >= WIN_BACK_LAPSED_DAYS
+                        ? {key: "notifications.winBack.titleLapsed"}
+                        : {
+                              key: "notifications.winBack.title",
+                              params: {count: milestone},
+                          },
                 body: weakest
-                    ? `Pick up where you left off — ${DOMAIN_LABEL[weakest.domain]} is your weakest domain.`
-                    : "Five questions is all it takes to restart the habit.",
+                    ? {
+                          key: "notifications.winBack.bodyWeakest",
+                          params: {domain: weakest.domain},
+                      }
+                    : {key: "notifications.winBack.body"},
                 path: String(PATHS.HOME),
             });
         }
@@ -237,61 +270,63 @@ const buildCandidates = (
     return candidates;
 };
 
-const FALLBACKS: Record<LearnerTier, {title: string; body: string}[]> = {
+type Fallback = {title: TranslationKey; body: TranslationKey};
+
+const FALLBACKS: Record<LearnerTier, Fallback[]> = {
     newcomer: [
         {
-            title: "Two questions, two minutes",
-            body: "The fastest way to find out what you already know.",
+            title: "notifications.fallback.newcomer.quickStart.title",
+            body: "notifications.fallback.newcomer.quickStart.body",
         },
         {
-            title: "Build the habit early",
-            body: "A short daily set beats one long session a week.",
+            title: "notifications.fallback.newcomer.habit.title",
+            body: "notifications.fallback.newcomer.habit.body",
         },
         {
-            title: "Pick up where you left off",
-            body: "Every answer teaches you why, not just what.",
+            title: "notifications.fallback.newcomer.resume.title",
+            body: "notifications.fallback.newcomer.resume.body",
         },
     ],
     learner: [
         {
-            title: "Keep your mastery climbing",
-            body: "A short set now keeps your weakest domain moving.",
+            title: "notifications.fallback.learner.mastery.title",
+            body: "notifications.fallback.learner.mastery.body",
         },
         {
-            title: "Level up your weakest domain",
-            body: "The adaptive engine will meet you where you are.",
+            title: "notifications.fallback.learner.weakest.title",
+            body: "notifications.fallback.learner.weakest.body",
         },
         {
-            title: "Ready for something harder?",
-            body: "Clear a few Professional questions to unlock Expert.",
+            title: "notifications.fallback.learner.harder.title",
+            body: "notifications.fallback.learner.harder.body",
         },
     ],
     candidate: [
         {
-            title: "The exam is within reach",
-            body: "A focused set today moves you closer to eligibility.",
+            title: "notifications.fallback.candidate.withinReach.title",
+            body: "notifications.fallback.candidate.withinReach.body",
         },
         {
-            title: "Sharpen before you certify",
-            body: "Expert questions are what the exam weighs the most.",
+            title: "notifications.fallback.candidate.sharpen.title",
+            body: "notifications.fallback.candidate.sharpen.body",
         },
         {
-            title: "Dress rehearsal",
-            body: "Try a timed challenge to practise under pressure.",
+            title: "notifications.fallback.candidate.rehearsal.title",
+            body: "notifications.fallback.candidate.rehearsal.body",
         },
     ],
     certified: [
         {
-            title: "Keep your edge",
-            body: "Certified developers lose ground fastest when they stop.",
+            title: "notifications.fallback.certified.edge.title",
+            body: "notifications.fallback.certified.edge.body",
         },
         {
-            title: "Stay interview ready",
-            body: "A few Expert questions keep the hard material fresh.",
+            title: "notifications.fallback.certified.interviewReady.title",
+            body: "notifications.fallback.certified.interviewReady.body",
         },
         {
-            title: "Defend your credential",
-            body: "Re-certification is easier when you never stopped.",
+            title: "notifications.fallback.certified.defend.title",
+            body: "notifications.fallback.certified.defend.body",
         },
     ],
 };
@@ -351,8 +386,8 @@ export const planNotifications = (
             trigger: "daily-goal" as const,
             tier,
             priority: 10,
-            title: fallback.title,
-            body: fallback.body,
+            title: {key: fallback.title},
+            body: {key: fallback.body},
             path: String(PATHS.HOME),
             fireAt: slot.toISOString(),
         };

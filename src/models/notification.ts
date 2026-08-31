@@ -1,3 +1,5 @@
+import type {TranslationRef} from "@/i18n/types";
+
 export type Notification = {
     to: string;
     title: string;
@@ -24,8 +26,8 @@ export type PlannedNotification = {
     trigger: EngagementTrigger;
     tier: LearnerTier;
     priority: number;
-    title: string;
-    body: string;
+    title: TranslationRef;
+    body: TranslationRef;
     path: string;
     fireAt: string;
 };

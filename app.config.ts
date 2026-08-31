@@ -108,6 +108,7 @@ export default ({config}: {config: ExpoConfig}): ExpoConfig => ({
         "expo-splash-screen",
         "expo-status-bar",
         "expo-font",
+        "expo-localization",
         "@react-native-community/datetimepicker",
     ],
 });

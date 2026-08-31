@@ -2,6 +2,8 @@ import {Column, Row, Spacer} from "@expo/ui";
 import {Button} from "@/components/atoms/Button/Button";
 import {Text} from "@/components/atoms/Text/Text";
 import {Card} from "@/components/molecules/Card/Card";
+import {useTranslation} from "@/i18n";
+import type {TranslationKey} from "@/i18n/types";
 import type {SessionCheckpoint} from "@/stores/quiz";
 import {SPACING} from "@/theme/spacing";
 import {useTheme} from "@/theme/useTheme";
@@ -15,16 +17,19 @@ export type CheckpointCardProps = {
 
 const FULL_WIDTH = {width: "100%"} as const;
 
-const encouragement = (accuracy: number) => {
-    if (accuracy >= 0.9) {
-        return "Exceptional run. Ready to push into harder material?";
+const STRONG_RUN = 0.9;
+const STEADY_RUN = 0.7;
+
+const encouragementKey = (accuracy: number): TranslationKey => {
+    if (accuracy >= STRONG_RUN) {
+        return "checkpoint.encouragement.high";
     }
 
-    if (accuracy >= 0.7) {
-        return "Solid pace. A few more and the next tier opens up.";
+    if (accuracy >= STEADY_RUN) {
+        return "checkpoint.encouragement.medium";
     }
 
-    return "The misses are queued for review. Keep going while it is fresh.";
+    return "checkpoint.encouragement.low";
 };
 
 const Stat = ({label, value}: {label: string; value: string}) => {
@@ -49,37 +54,46 @@ export const CheckpointCard = ({
     onStop,
 }: CheckpointCardProps) => {
     const {darkness, text} = useTheme();
+    const {t} = useTranslation();
 
     return (
         <Card alignment="center" testID="checkpoint-card">
             <Text type="title" color={darkness} align="center">
-                {`${checkpoint.answered} answered`}
+                {t("checkpoint.answered", {answered: checkpoint.answered})}
             </Text>
 
             <Text type="label" color={text} align="center">
-                {encouragement(checkpoint.accuracy)}
+                {t(encouragementKey(checkpoint.accuracy))}
             </Text>
 
             <Row alignment="center" style={FULL_WIDTH}>
                 <Stat
-                    label="Accuracy"
+                    label={t("checkpoint.accuracy")}
                     value={`${Math.round(checkpoint.accuracy * 100)}%`}
                 />
                 <Spacer flexible />
-                <Stat label="Correct" value={`${checkpoint.correct}`} />
+                <Stat
+                    label={t("checkpoint.correct")}
+                    value={`${checkpoint.correct}`}
+                />
                 <Spacer flexible />
-                <Stat label="XP" value={`+${checkpoint.xpEarned}`} />
+                <Stat
+                    label={t("checkpoint.xp")}
+                    value={`+${checkpoint.xpEarned}`}
+                />
             </Row>
 
             <Column spacing={SPACING[2]} style={FULL_WIDTH}>
                 <Button
                     testID="checkpoint-continue"
-                    title={`Keep going · ${nextMilestone} more`}
+                    title={t("checkpoint.keepGoing", {
+                        remaining: nextMilestone,
+                    })}
                     onPress={onContinue}
                 />
                 <Button
                     testID="checkpoint-stop"
-                    title="Save progress and pause"
+                    title={t("checkpoint.pause")}
                     variant="outlined"
                     onPress={onStop}
                 />

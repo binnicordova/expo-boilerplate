@@ -21,6 +21,8 @@ Layered, one direction only — `app/` → `stores/` → `services/` → `utils/
 - `src/stores/` Jotai atoms orchestrating utils + services. Persisted via `atomWithStorage`.
 - `src/services/` mock/remote data access (`api`, `assessment`, `notifications`).
 - `src/app/` Expo Router screens. Presentation only.
+- `src/i18n/` the translation catalogues and the typed translator. Cross-cutting like
+  `theme/`, so every layer may import it.
 
 **Rules.** Every screen wraps in `<Screen>` (owns the single `<Host>` bridge and content
 padding). `<Screen>` takes two props that exist purely to keep the practice loop cheap:
@@ -42,7 +44,7 @@ below it.
 - `atoms/` — `Text`, `Button`, `Icon`, `IconButton`, `ProgressBar`, `Pill`, `Surface`.
 - `molecules/` — `Card`, `AppBar`, `AnswerOption`, `CodeBlock`, `ChallengeTimer`.
 - `organisms/` — `QuestionCard`, `ProgressHeader`, `CheckpointCard`, `ReadinessCard`,
-  `MicroLearningCard`, `NotificationOptIn`, `SkillTree`, `NewsListItem`.
+  `MicroLearningCard`, `NotificationOptIn`, `SkillTree`, `NewsListItem`, `LanguagePicker`.
 - `templates/` — `Screen`.
 
 **`Surface` is the only place chrome is drawn.** Padding, fill, radius, background, border,
@@ -213,9 +215,48 @@ Valid 6 months.
    are scheduled ahead so delivery does not depend on the background task; level-appropriate
    fallbacks fill empty slots. Quiet hours 22–08. Capped at 60 pending (iOS limit is 64).
 
+## Internationalisation
+
+English and Spanish ship today; adding a language is a new file under `i18n/locales/` plus one
+entry in `constants/locales.ts`. **`en.ts` is the source of truth** — `es.ts` is typed as
+`Translation` (the shape of `en`), so a missing or misspelled key is a compile error, and
+`i18n/i18n.test.ts` additionally pins key coverage, interpolation-placeholder parity, and that
+no Spanish string was left as its English original.
+
+**Nothing below `app/` renders copy.** The layering rule extends to language: pure utils and
+stores emit a `TranslationRef` (`{key, params}`) or a bare `TranslationKey`, and the copy is
+resolved at the edge. That is what lets a notification planned this morning be *delivered*
+tonight in whatever language the phone is set to, and it keeps `utils/engagement.ts` and
+`utils/certification.ts` testable against keys rather than prose. `ExamGrade.failureReasons`,
+`ReadinessRequirement.label`, `PlannedNotification.title`/`body` and the `quiz`/`question`/`exam`
+error atoms all carry refs, not sentences.
+
+- **`useTranslation()` in components** (re-renders on a language change), **`translate` /
+  `translateRef` outside React** (`services/notifications.ts`, `hooks/useNotification.ts`).
+  Both take a `TranslationKey` — the union is derived from `en.ts`, so autocompletion works and
+  a typo does not compile.
+- **Plurals go through `count`.** i18next stores them as `key_one` / `key_other`; the key type
+  strips the suffix so callers still pass the base key. Spanish plural rules come from
+  `Intl.PluralRules`, which Hermes provides on both platforms.
+- **A label that needs another label nests**: `"$t(domain.{{domain}}) scored {{percentage}}%"`.
+  Interpolation runs before nesting, so the inner key can itself be dynamic — this is how
+  `badge.label`, `exam.failure.domain` and `notifications.skillUnlock.title` stay one string
+  for a translator instead of three fragments concatenated in TypeScript.
+- **Labels are never persisted.** `Badge` stores `domain` + `tier`, not a rendered string;
+  `SkillNode` and `ChallengeDefinition` store a `labelKey`. A badge earned in Spanish reads
+  correctly in English.
+- **Locale resolution is a pure function** (`utils/locale.ts`). The device list is walked in
+  preference order and regional variants collapse onto their base (`es-419` -> `es`); anything
+  unshipped falls back to English. i18next boots on the device language synchronously so the
+  first frame is already translated, and `useLocaleSync` (a bridge in `_layout.tsx`, next to
+  `useEngagementSync`) pushes the persisted override in once AsyncStorage hydrates. The
+  preference is `"system" | Locale` — `system` keeps following the phone.
+- **Dates take the locale explicitly**: `formatDate(value, locale)`, never a bare
+  `toLocaleDateString()`.
+
 ## Testing
 
-`npx jest` — 151 tests. Pure utils are exhaustively tested; stores are tested through `createStore()`
+`npx jest` — 188 tests. Pure utils are exhaustively tested; stores are tested through `createStore()`
 with AsyncStorage and `expo-application` mocked. **When product rules change, the tests are the
 spec — update them deliberately, they encode the tuning decisions.**
 
@@ -246,3 +287,8 @@ Verify with: `npx tsc --noEmit --skipLibCheck`, `npx biome check src/`, `npx jes
 - Notification opens are inferred (app opened via tap), not true delivery receipts.
 - Background task cadence is throttled by the OS; reliable win-back needs server-side push.
 - Tuning values in `constants/` are informed guesses, not validated against real cohorts.
+- Question and article **content** is not translated — the 137 imported articles and 438
+  questions stay Spanish, the 12 authored ones stay English. Only the app chrome is localised.
+- `expo-localization` exposes no locale-change listener, so a device language switch is picked
+  up on the next cold start rather than live.
+- The app's store name and icon label are not localised (`app.config.ts` has one `name`).

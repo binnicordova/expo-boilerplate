@@ -1,5 +1,4 @@
 import {
-    DOMAIN_LABEL,
     MASTERY_MIN_SAMPLE,
     MASTERY_TIERS,
     MAX_STREAK_MULTIPLIER,
@@ -116,7 +115,6 @@ export const resolveBadges = (
     const badge: Badge = {
         id: `${mastery.domain}-${tier}`,
         domain: mastery.domain,
-        label: `${DOMAIN_LABEL[mastery.domain]} ${tier}`,
         tier,
         unlockedAt: reference.toISOString(),
     };

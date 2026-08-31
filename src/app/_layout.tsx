@@ -11,6 +11,7 @@ import {
     SafeAreaView,
 } from "react-native-safe-area-context";
 import {useEngagementSync} from "@/hooks/useEngagementSync";
+import {useLocaleSync} from "@/hooks/useLocaleSync";
 import {useTheme} from "@/theme/useTheme";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +31,11 @@ const styles = StyleSheet.create({
 
 const EngagementBridge = () => {
     useEngagementSync();
+    return null;
+};
+
+const LocaleBridge = () => {
+    useLocaleSync();
     return null;
 };
 
@@ -54,6 +60,7 @@ const RootLayout = () => {
                     style={[styles.baseLayer, {backgroundColor: background}]}
                 >
                     <StatusBar style="auto" />
+                    <LocaleBridge />
                     <EngagementBridge />
                     <Slot />
                 </SafeAreaView>

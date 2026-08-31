@@ -3,6 +3,7 @@ import {Icon} from "@/components/atoms/Icon/Icon";
 import {Surface} from "@/components/atoms/Surface/Surface";
 import {Text} from "@/components/atoms/Text/Text";
 import {Card} from "@/components/molecules/Card/Card";
+import {useTranslation} from "@/i18n";
 import type {MicroLearningDigest} from "@/models/assessment";
 import {SPACING} from "@/theme/spacing";
 import {ICON_SIZE} from "@/theme/typography";
@@ -26,6 +27,7 @@ export const MicroLearningCard = ({
     variant = "card",
 }: MicroLearningCardProps) => {
     const {darkness, muted, text, error, success} = useTheme();
+    const {t} = useTranslation();
     const tone = correct ? success : error;
 
     const content = (
@@ -41,12 +43,12 @@ export const MicroLearningCard = ({
                     color={tone}
                 />
                 <Text type="subtitle" color={tone}>
-                    {correct ? "Correct" : "Not quite"}
+                    {correct ? t("digest.correct") : t("digest.incorrect")}
                 </Text>
                 <Spacer flexible />
                 {Boolean(xpAwarded) && (
                     <Text type="label" color={tone}>
-                        {`+${xpAwarded} XP`}
+                        {t("digest.xpAwarded", {xp: xpAwarded ?? 0})}
                     </Text>
                 )}
             </Row>

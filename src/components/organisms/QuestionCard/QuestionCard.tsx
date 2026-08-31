@@ -7,7 +7,7 @@ import {
 } from "@/components/molecules/AnswerOption/AnswerOption";
 import {Card} from "@/components/molecules/Card/Card";
 import {CodeBlock} from "@/components/molecules/CodeBlock/CodeBlock";
-import {DIFFICULTY_LABEL, DOMAIN_LABEL} from "@/constants/assessment";
+import {useTranslation} from "@/i18n";
 import type {AssessmentQuestion, AssessmentResponse} from "@/models/assessment";
 import {isOrderingQuestion} from "@/models/assessment";
 import {SPACING} from "@/theme/spacing";
@@ -24,14 +24,6 @@ export type QuestionCardProps = {
     shuffleSeed?: string;
     maxOptions?: number;
     onRespond: (targetId: string) => void;
-};
-
-const FORMAT_HINT: Record<AssessmentQuestion["format"], string> = {
-    "multiple-choice": "Choose the best answer.",
-    "multiple-select": "Select every answer that applies.",
-    "code-analysis": "Read the snippet, then choose the best answer.",
-    "architecture-tradeoff": "Weigh the trade-offs, then choose one design.",
-    ordering: "Tap the steps in order. Tap again to remove.",
 };
 
 const resolveState = (payload: {
@@ -60,6 +52,7 @@ export const QuestionCard = ({
     onRespond,
 }: QuestionCardProps) => {
     const {accent, darkness, text} = useTheme();
+    const {t} = useTranslation();
     const seed = shuffleSeed ?? question.id;
 
     const alternatives = useMemo(
@@ -93,11 +86,11 @@ export const QuestionCard = ({
         <Card testID="question-card">
             <Row alignment="center" style={{width: "100%"}}>
                 <Text type="caption" color={accent}>
-                    {DOMAIN_LABEL[question.domain]}
+                    {t(`domain.${question.domain}`)}
                 </Text>
                 <Spacer flexible />
                 <Text type="caption" color={text}>
-                    {DIFFICULTY_LABEL[question.difficulty]}
+                    {t(`difficulty.${question.difficulty}`)}
                 </Text>
             </Row>
 
@@ -118,7 +111,7 @@ export const QuestionCard = ({
             )}
 
             <Text type="caption" color={text}>
-                {FORMAT_HINT[question.format]}
+                {t(`question.hint.${question.format}`)}
             </Text>
 
             <Column spacing={SPACING[2]} style={optionList}>
